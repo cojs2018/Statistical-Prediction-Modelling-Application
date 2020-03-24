@@ -1,0 +1,35 @@
+@relation epl_training
+
+@attribute Team_name STRING
+@attribute Matches_played numeric
+@attribute Total_wins numeric
+@attribute Total_draws numeric
+@attribute Total_loses numeric
+@attribute Total_points numeric
+@attribute Goals_for numeric
+@attribute Goals_against numeric
+@attribute Goal_difference numeric
+@attribute Points_from_five numeric
+@attribute Class {CL, EL, S, R} %Current Standing
+
+@data
+Liv,29,27,1,1,82,66,21,45,6,CL
+Mct,28,18,3,7,57,68,31,37,12,S
+Lei,29,16,5,8,53,58,28,30,7,CL
+Che,29,14,6,9,48,51,39,12,10,CL
+Mtd,29,12,9,8,45,44,30,14,13,CL
+Wlv,29,10,13,6,43,41,34,7,8,EL
+Shf,28,11,10,7,43,30,25,5,13,EL
+Ttm,29,11,8,10,41,47,40,7,2,EL
+Ars,28,9,13,6,40,40,36,4,12,S
+Bnl,29,11,6,12,39,34,40,-6,9,S
+Cpl,29,10,9,10,39,26,32,-6,9,S
+Evt,29,10,7,12,37,37,46,-9,7,S
+Ncl,29,9,8,12,35,25,41,-16,7,S
+Spt,29,10,4,15,34,35,52,-17,3,S
+Brt,29,6,11,12,29,32,40,-8,4,S
+Whm,29,7,6,16,27,35,50,-15,4,S
+Wfd,29,6,9,14,27,27,44,-17,4,S
+Bmt,29,7,6,16,27,29,47,-18,4,R
+Avl,28,7,4,17,25,34,56,-22,0,R
+Nrc,29,5,6,18,21,25,52,-27,4,R
