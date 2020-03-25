@@ -8,6 +8,7 @@
 #include "Matrix.h";
 
 using namespace std;
+using namespace MATH;
 
 namespace ARFF
 {
@@ -42,7 +43,7 @@ namespace ARFF
 
 		int match_day;
 
-		feasible_solution get_result();
+		feasible_solution result;
 	};
 
 	class League
@@ -50,5 +51,13 @@ namespace ARFF
 	public:
 		vector<Team> all_teams;
 		vector<Match> all_matches;
+
+		Season complete_league();
+	};
+
+	class Season 
+	{
+	public:
+		vector<League> this_season;
 	};
 }

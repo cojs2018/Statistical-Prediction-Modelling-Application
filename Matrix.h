@@ -6,15 +6,17 @@ using namespace std;
 
 namespace MATH
 {
-	typedef struct feasible_solution
+	struct feasible_solution
 	{
 		Matrix X;
 		Matrix C;
 
 		int z;
-	}
 
-	feasible_solution linear_program(Matrix, Matrix, Matrix);
+		feasible_solution() = default;
+	};
+
+	feasible_solution linear_program(Matrix C, Matrix M, Matrix v);
 
 	void swap_columns(Matrix A, Matrix B, int enter, int leave);
 
@@ -22,13 +24,14 @@ namespace MATH
 
 	class Matrix
 	{
-	private:
+	public:
 		vector<vector<int>> matrix; //Contains matrix data
 		int size[2]; //dimentions of matrix
 
-	public:
+		Matrix() = default;
+
 		Matrix(int n, int m, int value = 0) { //Initalise matrix with all elements set to a constant value;
-			size = { n, m };
+			size[0] = n; size[1] = m;
 
 			for (int i = 0; i < n; i++) {
 				vector<int> row;
@@ -41,7 +44,7 @@ namespace MATH
 
 		Matrix(vector<vector<int>> M) { //Fill matrix with data from two dimentional array
 			matrix = M;
-			size = { M.size(), M.at(0).size() };
+			size[0] = M.size(); size[1] = M.at(0).size();
 		}
 
 		Matrix operator >> (Matrix const& obj) { //Post-multiplication of matrices
@@ -49,11 +52,11 @@ namespace MATH
 			int n1 = obj.size[0]; int m1 = obj.size[1];
 
 			if (n1 == m0) { //If two matrices correspond
-				Matrix result = new Matrix(n0, m1, 0);
+				Matrix result = Matrix(n0, m1, 0);
 
 				for (int i = 0; i < n0; i++) {
 					for (int j = 0; j < m1; j++) {
-						for (int ii = 0; i < m0 ii++) {
+						for (int ii = 0; i < m0; ii++) {
 							for (int jj = 0; jj < n1; jj++) {
 								result.matrix.at(i).at(j) = matrix.at(i).at(jj) + obj.matrix.at(ii).at(j);
 							}
@@ -73,11 +76,11 @@ namespace MATH
 			int n1 = size[0]; int m1 = size[1];
 
 			if (n1 == m0) { //If two matrices correspond
-				Matrix result = new Matrix(n0, m1, 0);
+				Matrix result = Matrix(n0, m1, 0);
 
 				for (int i = 0; i < n0; i++) {
 					for (int j = 0; j < m1; j++) {
-						for (int ii = 0; i < m0 ii++) {
+						for (int ii = 0; i < m0; ii++) {
 							for (int jj = 0; jj < n1; jj++) {
 								result.matrix.at(i).at(j) = obj.matrix.at(i).at(jj) + matrix.at(ii).at(j);
 							}
@@ -97,7 +100,7 @@ namespace MATH
 			int n1 = obj.size[0]; int m1 = obj.size[1];
 
 			if (n0 == n1 && m0 == m1) { //If two matrices correspond
-				Matrix result = new Matrix(n0, m1, 0);
+				Matrix result = Matrix(n0, m1, 0);
 
 				for (int i = 0; i < n0; i++) {
 					for (int j = 0; j < m1; j++) {
@@ -115,7 +118,7 @@ namespace MATH
 		Matrix operator * (int const& obj) {
 			int n = matrix.size[0]; int m = matrix.size[1];
 
-			Matrix result = new Matrix(n, m, 0);
+			Matrix result = Matrix(n, m, 0);
 			for (int i = 0; i < n; i++) {
 				for (int j = 0; j < m; j++) {
 					result.matrix.at(i).at(j) = obj * matrix.at(i).at(j);
@@ -125,30 +128,30 @@ namespace MATH
 			return result;
 		}
 
-		Matrix operator - (Matrix const& obj) {
-			return (this + (-1) * obj);
-		}
+		Matrix operator - (Matrix const& obj); /*{
+			return this + (obj * (-1));
+		}*/
 
 		Matrix operator ^ (int const& obj) {
 			if (obj > 1) {
-				return this >> (this ^ (obj - 1));
+				return *this >> (*this ^ (obj - 1));
 			}
 			else if (obj == 1) {
-				return this;
+				return *this;
 			}
 			else if (obj == 0) {
 				return identity(size[0]);
 			}
 			else if (obj == -1) {
-				return this.inverse();
+				return this->inverse();
 			}
 			else { //If obj < -1
-				return (this.inverse()) ^ (-1 * obj);
+				return (this->inverse()) ^ (-1 * obj);
 			}
 		}
 
 		Matrix identity(int n) { //Returns identity square matrix of dimentions n x n
-			Matrix I = new matrix(n, n, 0);
+			Matrix I = Matrix(n, n, 0);
 			for (int i = 0; i < n; i++) {
 				I.matrix.at(i).at(i) = 1;
 			}
@@ -156,10 +159,12 @@ namespace MATH
 		}
 
 		Matrix inverse() { //Get invese of matrix using Gaussian elimination
-			Matrix A = this;
+			Matrix A = *this;
 
 			if (A.size[0] == A.size[1]) { //If matrix A is square
 				Matrix I = identity(A.size[0]);
+
+				int n = A.size[0];
 
 				for (int i = 0; i < n - 1; i++) { //Get Echilon form
 					int a_ii = A.matrix.at(i).at(i);
@@ -194,8 +199,8 @@ namespace MATH
 		}
 
 		Matrix transpose() { //Get transpose of matrix
-			Matrix A = this;
-			Matrix T = new Matrix(A.size[1], A.size[0], 0);
+			Matrix A = *this;
+			Matrix T = Matrix(A.size[1], A.size[0], 0);
 
 			for (int i = 0; i < A.size[1]; i++) {
 				for (int j = 0; j < A.size[0]; j++) {
@@ -212,7 +217,7 @@ namespace MATH
 
 		Matrix atr(int i) { //Return row i
 			vector<int> row; //Create empty row
-			Matrix result = new Matrix(1, size[1], 0);
+			Matrix result = Matrix(1, size[1], 0);
 
 			for (int j = 0; j < size[1]; j++) {
 				row.push_back(matrix.at(i).at(j));
@@ -223,7 +228,7 @@ namespace MATH
 		}
 
 		Matrix atc(int j) { //Return column j
-			Matrix result = new Matrix(size[0], 1, 0);
+			Matrix result = Matrix(size[0], 1, 0);
 
 			for (int i = 0; i < size[0]; i++) {
 				vector<int> element;
@@ -234,7 +239,5 @@ namespace MATH
 
 			return result;
 		}
-	}
-}
-
-		
+	};
+}		
