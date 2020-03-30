@@ -56,13 +56,13 @@
         android:layout_height="48dp"
         android:text="Load existing data"
         tools:layout_editor_absoluteX="79dp"
-        tools:layout_editor_absoluteY="253dp" />
+        tools:layout_editor_absoluteY="261dp" />
 
     <Button
         android:id="@+id/readme"
-        android:layout_width="252"
-        android:layout_height="48"
+        android:layout_width="252dp"
+        android:layout_height="48dp"
         android:text="How does it work?"
         tools:layout_editor_absoluteX="79dp"
-        tools:layout_editor_absoluteY="341dp" />
+        tools:layout_editor_absoluteY="359dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>
