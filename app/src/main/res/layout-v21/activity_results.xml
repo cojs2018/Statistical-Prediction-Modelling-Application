@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".Results">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
@@ -39,22 +39,69 @@
         </com.google.android.material.tabs.TabLayout>
         
         <TableLayout
+            android:id="@+id/table_res"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-        
-        <ImageView
+            android:layout_height="wrap_content"
+            android:stretchColumns="*"
+            android:visibility="invisible">
+
+            <TableRow
+                android:id="@+id/cloumn_headers">
+
+                <TextView
+                    android:text="RK"/>
+
+                <TextView
+                    android:text="Name"/>
+
+                <TextView
+                    android:text="MP"/>
+
+                <TextView
+                    android:text="W"/>
+
+                <TextView
+                    android:text="D"/>
+
+                <TextView
+                    android:text="L"/>
+
+                <TextView
+                    android:text="TP"/>
+
+                <TextView
+                    android:text="GF"/>
+
+                <TextView
+                    android:text="GA"/>
+
+                <TextView
+                    android:text="GD"/>
+
+                <TextView
+                    android:text="P5"/>
+
+            </TableRow>
+
+        </TableLayout>
+
+        <SeekBar
+            android:id="@+id/seek_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:visibility="invisible"/>
-        
-        <SeekBar
+
+        <ImageView
+            android:id="@+id/graph_view"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-        
+            android:layout_height="wrap_content"
+            android:scaleType="centerInside"
+            android:visibility="visible" />
+
         <Toolbar
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="invisible"/>
+            android:visibility="visible"/>
 
         <ListView
             android:layout_width="match_parent"

@@ -233,7 +233,13 @@ Season ARFF::League::complete_league()
 		this->all_matches.erase(this->all_matches.begin());
 	}
 
-	return year;
+	//Sort each league table on team points descending
+	for(League league : year.this_season){
+	    auto byTotalPoints = [](Team t1, Team t2) { return (t1.total_points > t2.total_points); };
 
+	    sort_heap(league.all_teams.begin(), league.all_teams.end(), byTotalPoints);
+	}
+
+	return year;
 }
 

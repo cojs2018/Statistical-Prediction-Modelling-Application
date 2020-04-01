@@ -20,8 +20,11 @@ public class Loading extends AppCompatActivity {
         Bundle newSavedInstanceState = new Bundle();
         this.onCreate(newSavedInstanceState);
 
-        System.loadLibrary("ArffData");
+        //System.loadLibrary("ArffData");
 
         //ToDo: Add code that computes "arff_to_league(training_set_dir, test_set_dir)"
+        call_cpp(training_set_dir, test_set_dir);
     }
+
+    public native void call_cpp(String train, String test);
 }
