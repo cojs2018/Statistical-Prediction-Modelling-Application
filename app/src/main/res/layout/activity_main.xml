@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:background="#633974">
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline"
@@ -38,31 +39,46 @@
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
         android:text="TextView"
-        tools:layout_editor_absoluteX="166dp"
-        tools:layout_editor_absoluteY="99dp" />
+        android:textColor="#FFFFFF"
+        android:textSize="36sp"
+        app:layout_constraintBottom_toTopOf="@+id/startNew"
+        app:layout_constraintEnd_toStartOf="@+id/guideline2"
+        app:layout_constraintStart_toStartOf="@+id/guideline"
+        app:layout_constraintTop_toTopOf="@+id/guideline3"
+        app:layout_constraintVertical_bias="0.736" />
 
     <Button
         android:id="@+id/startNew"
         android:layout_width="252dp"
         android:layout_height="48dp"
+        android:layout_marginBottom="44dp"
         android:text="Start new data visualization"
-        tools:layout_editor_absoluteX="79dp"
-        tools:layout_editor_absoluteY="171dp" />
+        app:layout_constraintBottom_toTopOf="@+id/loadExisting"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/loadExisting"
         android:layout_width="252dp"
         android:layout_height="48dp"
+        android:layout_marginBottom="44dp"
         android:text="Load existing data"
-        tools:layout_editor_absoluteX="79dp"
-        tools:layout_editor_absoluteY="261dp" />
+        app:layout_constraintBottom_toTopOf="@+id/readme"
+        app:layout_constraintEnd_toStartOf="@+id/guideline2"
+        app:layout_constraintHorizontal_bias="0.552"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/readme"
         android:layout_width="252dp"
         android:layout_height="48dp"
+        android:layout_marginBottom="252dp"
         android:text="How does it work?"
-        tools:layout_editor_absoluteX="79dp"
-        tools:layout_editor_absoluteY="359dp" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.444"
+        app:layout_constraintStart_toStartOf="@+id/guideline" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -2,17 +2,24 @@ package com.example.statisticalpredictionmodellingapplication;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 //import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.media.Image;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -20,6 +27,12 @@ import android.widget.TextView;
 
 import com.google.android.material.tabs.TabLayout;
 //import com.google.android.material.tabs.TabLayoutMediator;
+
+import com.softmoore.android.graphlib.Function;
+import com.softmoore.android.graphlib.Graph;
+import com.softmoore.android.graphlib.GraphView;
+import com.softmoore.android.graphlib.Label;
+import com.softmoore.android.graphlib.Point;
 
 import java.util.Vector;
 
@@ -170,7 +183,7 @@ public class Results extends AppCompatActivity {
 
     public class ResultsSeekBar {
 
-        public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceStete) {
+        public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
             ResultsTableLayout results_table = new ResultsTableLayout();
 
             results_table.x = 0;
@@ -185,7 +198,7 @@ public class Results extends AppCompatActivity {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                     results_table.x = progress;
-                    results_table.onViewCreated(view, savedInstanceStete);
+                    results_table.onViewCreated(view, savedInstanceState);
                 }
 
                 @Override
@@ -196,6 +209,113 @@ public class Results extends AppCompatActivity {
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar) {
 
+                }
+            } );
+        }
+    }
+
+    public class ResultsGraphView {
+
+
+
+        public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState){
+            //Declare the three buttons
+            Button button_horizontal = view.findViewById(R.id.axis_data_horizontal);
+            Button button_vertical = view.findViewById(R.id.axis_data_vertical);
+            Button button_line = view.findViewById(R.id.line_choice);
+
+            Context context = getApplicationContext();
+
+            //Declare graph and graph view
+            //Graph graph = new Graph.Builder().build();
+            GraphView graphView = view.findViewById(R.id.graph_view);
+
+            Season ssn = new Season();
+
+            final int[] x = new int[1];
+            final int[] y = new int[1];
+
+            final Vector<String> setOfTeamNames = new Vector<>();
+
+            button_horizontal.setOnClickListener( new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+                    builder.setTitle("Horizontal Axis");
+
+                    builder.setItems( new CharSequence[]{"Matches played", "Total wins",
+                                    "Total draws", "Total loses", "Total points", "Goals For", "Goals Against",
+                                    "Goal difference", "Points from 5"},
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    y[0] = which;
+                                }
+                            } );
+                }
+            } );
+
+            button_vertical.setOnClickListener( new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+                    builder.setTitle("Vertical Axis");
+
+                    builder.setItems( new CharSequence[]{"Matches played", "Total wins",
+                                    "Total draws", "Total loses", "Total points", "Goals For", "Goals Against",
+                                    "Goal difference", "Points from 5"},
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    x[0] = which;
+                                }
+                            } );
+                }
+            } );
+
+            button_line.setOnClickListener( new View.OnClickListener() {
+                @RequiresApi(api = Build.VERSION_CODES.N)
+                @Override
+                public void onClick(View v) {
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+                    builder.setTitle("Select Teams");
+
+                    CharSequence charSeq[] = new CharSequence[ssn.resultsLeague.elementAt(0).league_at_week.size()];
+                    boolean checkedItems[] = new boolean[ssn.resultsLeague.elementAt(0).league_at_week.size()];
+                    for(int i = 0; i < ssn.resultsLeague.elementAt(0).league_at_week.size(); i++){
+                        charSeq[i] = ssn.resultsLeague.elementAt(0).league_at_week.elementAt(i).team_name;
+                        checkedItems[i] = true;
+                    }
+
+                    builder.setMultiChoiceItems( charSeq, checkedItems, new DialogInterface.OnMultiChoiceClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                            //ToDo: edit which lines are shown in graph
+                            String teamName = String.valueOf( ssn.resultsLeague.elementAt(0).league_at_week.elementAt(which));
+
+                            if(isChecked){
+                                setOfTeamNames.add(teamName);
+                            }
+                            else {
+                                setOfTeamNames.remove(teamName);
+                            }
+                        }
+                    } );
+
+                    //Construct graph
+                    Graph graph = new Graph.Builder().build();
+
+                    for(int i = 0; i < setOfTeamNames.size(); i++) {
+                        Vector<Point> newLine = ssn.getPoints(x[0], y[0], setOfTeamNames.elementAt(i));
+
+                        graph = new Graph.Builder().addLineGraph(newLine).build();
+                    }
+
+                    graphView.setGraph(graph);
                 }
             } );
         }

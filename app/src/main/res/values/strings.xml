@@ -5,4 +5,17 @@
     <string name="tab_text_2">Tab 2</string>
     <string name="title_activity_results_page">ResultsPage</string>
     <string name="action_settings">Settings</string>
+
+    <string-array name="headers">
+        <item>matches played</item>
+        <item>total wins</item>
+        <item>total draws</item>
+        <item>total loses</item>
+        <item>total points</item>
+        <item>goals for</item>
+        <item>goals against</item>
+        <item>goal difference</item>
+        <item>points from 5</item>
+    </string-array>
+    <string name="title_activity_main2">Main2Activity</string>
 </resources>

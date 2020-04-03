@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -6,10 +7,24 @@
     android:layout_height="match_parent"
     tools:context=".Results">
 
+    <TextureView
+        android:id="@+id/textureView2"
+        android:layout_width="0dp"
+        android:layout_height="72dp"
+        android:background="#633974"
+        android:foreground="#633974"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_width="416dp"
+        android:layout_height="660dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textureView2">
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tab_layout"
@@ -20,24 +35,23 @@
                 android:id="@+id/tab_table"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="table"/>
+                android:text="table" />
 
             <com.google.android.material.tabs.TabItem
                 android:id="@+id/tab_graph"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="graph"/>
+                android:text="graph" />
 
             <com.google.android.material.tabs.TabItem
                 android:id="@+id/tab_results"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="results"/>
-
+                android:text="results" />
 
 
         </com.google.android.material.tabs.TabLayout>
-        
+
         <TableLayout
             android:id="@+id/table_res"
             android:layout_width="match_parent"
@@ -45,41 +59,29 @@
             android:stretchColumns="*"
             android:visibility="invisible">
 
-            <TableRow
-                android:id="@+id/cloumn_headers">
+            <TableRow android:id="@+id/cloumn_headers">
 
-                <TextView
-                    android:text="RK"/>
+                <TextView android:text="RK" />
 
-                <TextView
-                    android:text="Name"/>
+                <TextView android:text="Name" />
 
-                <TextView
-                    android:text="MP"/>
+                <TextView android:text="MP" />
 
-                <TextView
-                    android:text="W"/>
+                <TextView android:text="W" />
 
-                <TextView
-                    android:text="D"/>
+                <TextView android:text="D" />
 
-                <TextView
-                    android:text="L"/>
+                <TextView android:text="L" />
 
-                <TextView
-                    android:text="TP"/>
+                <TextView android:text="TP" />
 
-                <TextView
-                    android:text="GF"/>
+                <TextView android:text="GF" />
 
-                <TextView
-                    android:text="GA"/>
+                <TextView android:text="GA" />
 
-                <TextView
-                    android:text="GD"/>
+                <TextView android:text="GD" />
 
-                <TextView
-                    android:text="P5"/>
+                <TextView android:text="P5" />
 
             </TableRow>
 
@@ -89,30 +91,45 @@
             android:id="@+id/seek_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="invisible"/>
+            android:visibility="invisible" />
 
-        <ImageView
+        <com.softmoore.android.graphlib.GraphView
             android:id="@+id/graph_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:scaleType="centerInside"
-            android:visibility="visible" />
+            android:layout_width="wrap_content"
+            android:layout_height="446dp" />
 
-        <Toolbar
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="visible"/>
+            android:orientation="horizontal">
 
-        <ListView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="invisible"/>
+            <Button
+                android:id="@+id/axis_data_horizontal"
+                android:layout_width="142dp"
+                android:layout_height="wrap_content"
+                android:text="horizontal" />
+
+            <Button
+                android:id="@+id/axis_data_vertical"
+                android:layout_width="131dp"
+                android:layout_height="match_parent"
+                android:text="Vertical" />
+
+            <Button
+                android:id="@+id/line_choice"
+                android:layout_width="136dp"
+                android:layout_height="wrap_content"
+                android:text="display" />
+
+        </LinearLayout>
 
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/pager"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+        </androidx.viewpager2.widget.ViewPager2>
 
     </LinearLayout>
 
