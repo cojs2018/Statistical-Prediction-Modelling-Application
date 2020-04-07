@@ -13,7 +13,7 @@ class cplpl
 public:
     JNIEXPORT void JNICALL Java_Loading_call_cpp(JNIENV *, jstring, jstring);
 
-    JNIEXPORT void JNICALL season_to_display(Season);
+    JNIEXPORT Season JNICALL season_to_display(JNIENV *, Season);
 }
 
 #endif //STATISTICALPREDICTIONMODELLINGAPPLICATION_CPP2JAVA_H

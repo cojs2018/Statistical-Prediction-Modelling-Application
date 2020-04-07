@@ -52,12 +52,46 @@
 
         </com.google.android.material.tabs.TabLayout>
 
+        <LinearLayout
+            android:id="@+id/linear_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:scrollbarAlwaysDrawVerticalTrack="true"
+            android:visibility="visible">
+
+            <ListView
+                android:id="@+id/C0_list"
+                style="@style/Widget.AppCompat.ListView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <ListView
+                android:id="@+id/C1_list"
+                style="@style/Widget.AppCompat.ListView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <ListView
+                android:id="@+id/C2_list"
+                style="@style/Widget.AppCompat.ListView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <TableLayout
+                android:id="@+id/match_results"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+            </TableLayout>
+
+        </LinearLayout>
+
         <TableLayout
             android:id="@+id/table_res"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:stretchColumns="*"
-            android:visibility="invisible">
+            android:visibility="gone">
 
             <TableRow android:id="@+id/cloumn_headers">
 
@@ -91,17 +125,19 @@
             android:id="@+id/seek_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="invisible" />
+            android:visibility="gone" />
 
         <com.softmoore.android.graphlib.GraphView
             android:id="@+id/graph_view"
             android:layout_width="wrap_content"
-            android:layout_height="446dp" />
+            android:layout_height="446dp"
+            android:visibility="gone"/>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:visibility="gone">
 
             <Button
                 android:id="@+id/axis_data_horizontal"

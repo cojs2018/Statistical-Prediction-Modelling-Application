@@ -13,6 +13,12 @@ import com.softmoore.android.graphlib.Point;
 
 public class Season {
 
+    //Default constructor
+    public Season() {
+        //Call an empty season
+        resultsLeague = new Vector<>();
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.N)
     public Vector<Point> getPoints(int xaxis, int yaxis, String teamstr){
         Vector<Point> toGraph = new Vector<>();
@@ -43,6 +49,8 @@ public class Season {
     }
 
     public Vector<League> resultsLeague;
+
+    public Vector<Match> matchResults;
 
     public class League {
         public Vector<Team> league_at_week;
@@ -97,4 +105,16 @@ public class Season {
         }
 
     }
+
+    public class Match {
+        public Team home;
+        public Team away;
+
+        public Vector<Integer> score; //Size 2;
+    }
+
+    public Season getSeason() {
+        return null;
+    }
+
 }

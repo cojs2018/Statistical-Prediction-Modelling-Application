@@ -9,10 +9,13 @@ import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.media.Image;
+import android.net.sip.SipSession;
+import android.opengl.Matrix;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -20,11 +23,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import com.google.android.material.tabs.TabItem;
 import com.google.android.material.tabs.TabLayout;
 //import com.google.android.material.tabs.TabLayoutMediator;
 
@@ -38,15 +44,38 @@ import java.util.Vector;
 
 public class Results extends AppCompatActivity {
 
+    public ResultsTableLayout resultsTableLayout;
+    public ResultsSeekBar resultsSeekBar;
+    public ResultsGraphView resultsGraphView;
+    public ResultsListViews resultsListViews;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_results);
     }
 
+
+    //Default constructor
+    public Results() {
+        CollectionResultsFragment collectionResultsFragment = new CollectionResultsFragment();
+
+    }
+
+
     public class CollectionResultsFragment extends Fragment {
         ResultsCollectionAdapter resultsCollectionAdapter;
         ViewPager viewPager;
+
+        //Default constructor
+        public CollectionResultsFragment() {
+            LayoutInflater inflater = getLayoutInflater();
+
+            ViewGroup container = null;
+            Bundle thisInstanceState = null;
+
+            onCreate(inflater, container, thisInstanceState);
+        }
 
         @Nullable
         //@Override
@@ -59,10 +88,74 @@ public class Results extends AppCompatActivity {
         public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
             resultsCollectionAdapter = new ResultsCollectionAdapter(this);
             viewPager = view.findViewById(R.id.pager);
-            //viewPager.setAdapter(resultsCollectionAdapter);
+            //viewPager.setAdapter( resultsCollectionAdapter);
 
             TabLayout tabLayout = view.findViewById(R.id.tab_layout);
-            //new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> tab.setText("OBJECT" + (position + 1))).attach();
+
+            TabLayout.Tab tableTab = new TabLayout.Tab();
+            tableTab.setText("TABLE");
+            tabLayout.addTab(tableTab, 0, true); //Default plane
+
+            TabLayout.Tab graphTab = new TabLayout.Tab();
+            graphTab.setText("GRAPH");
+            tabLayout.addTab(graphTab, 1, false);
+
+            TabLayout.Tab resultsTab = new TabLayout.Tab();
+            resultsTab.setText("RESULTS");
+            tabLayout.addTab(resultsTab, 2, false);
+
+            tabLayout.addOnTabSelectedListener( new TabLayout.OnTabSelectedListener() {
+                @Override
+                public void onTabSelected(TabLayout.Tab tab) {
+                    /* Here there are three tabs determining which items are shown on screen.
+                     * 1. The first and default tab will be displaying the table view.
+                     * 2. The second will be showing the graph data.
+                     * 3. The third will show the results individually in a list view
+                     */
+
+                    if(tabLayout.getSelectedTabPosition() == 0) {
+                        //Display first plane
+                        resultsTableLayout = new ResultsTableLayout();
+                        resultsTableLayout.x = 0; //Set table at initial data;
+                        resultsTableLayout.onViewCreated(view, savedInstanceState);
+
+                        resultsSeekBar = new ResultsSeekBar();
+                        resultsSeekBar.onViewCreated(view, savedInstanceState);
+                    }
+                    else if (tabLayout.getSelectedTabPosition() == 1) {
+                        //Display second plane
+                        resultsGraphView = new ResultsGraphView();
+                        resultsGraphView.onViewCreated(view, savedInstanceState);
+                    }
+                    else if (tabLayout.getSelectedTabPosition() == 2) {
+                        //Display third plane
+                        resultsListViews = new ResultsListViews();
+                        resultsListViews.onViewCreated(view, savedInstanceState);
+                    }
+                }
+
+                @Override
+                public void onTabUnselected(TabLayout.Tab tab) {
+                    if(tab.getPosition() == 0) {
+                        //Make table invisible
+                        resultsTableLayout.destroy();
+                        resultsSeekBar.destroy();
+                    }
+                    else if (tab.getPosition() == 1) {
+                        //Make graph invisible
+                        resultsGraphView.destroy();
+                    }
+                    else if (tab.getPosition() == 2) {
+                        //Make thrid plane invisible
+                        resultsListViews.destroy();
+                    }
+                }
+
+                @Override
+                public void onTabReselected(TabLayout.Tab tab) {
+                    this.onTabSelected(tab);
+                }
+            } );
         }
     }
 
@@ -110,16 +203,21 @@ public class Results extends AppCompatActivity {
 
         public int x;
 
+        public Season season;
+
+        public TableLayout tableRes;
+
         //@Override
         public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-            Season ssn = new Season();
             
-            TableLayout tableRes = view.findViewById(R.id.table_res);
+            tableRes = view.findViewById(R.id.table_res);
 
-
+            if(tableRes.getVisibility() != View.VISIBLE) {
+                tableRes.setVisibility(View.VISIBLE);
+            }
 
             Vector<Season.Team> leagueResults = 
-                    ssn.resultsLeague.elementAt(x).league_at_week;
+                    season.resultsLeague.elementAt(x).league_at_week;
 
             //Print results in table
             for (int i = 0; i < leagueResults.size(); i++) {
@@ -179,20 +277,26 @@ public class Results extends AppCompatActivity {
                 tableRes.addView(newRow);
             }
         }
+
+        public void destroy(){
+            tableRes.setVisibility(View.GONE);
+        }
     }
 
     public class ResultsSeekBar {
+
+        public Season season;
+
+        public SeekBar seekbar;
 
         public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
             ResultsTableLayout results_table = new ResultsTableLayout();
 
             results_table.x = 0;
 
-            Season ssn = new Season();
-
             //Set out seekBar
-            SeekBar seekbar = view.findViewById(R.id.seek_bar);
-            seekbar.setMax(ssn.resultsLeague.size() - 1);
+            seekbar = view.findViewById(R.id.seek_bar);
+            seekbar.setMax(season.resultsLeague.size() - 1);
 
             seekbar.setOnSeekBarChangeListener( new SeekBar.OnSeekBarChangeListener() {
                 @Override
@@ -212,11 +316,17 @@ public class Results extends AppCompatActivity {
                 }
             } );
         }
+
+        public void destroy() {
+            seekbar.setVisibility(View.GONE);
+        }
     }
 
     public class ResultsGraphView {
 
+        public Season season;
 
+        public GraphView graphView;
 
         public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState){
             //Declare the three buttons
@@ -228,9 +338,7 @@ public class Results extends AppCompatActivity {
 
             //Declare graph and graph view
             //Graph graph = new Graph.Builder().build();
-            GraphView graphView = view.findViewById(R.id.graph_view);
-
-            Season ssn = new Season();
+            graphView = view.findViewById(R.id.graph_view);
 
             final int[] x = new int[1];
             final int[] y = new int[1];
@@ -284,10 +392,10 @@ public class Results extends AppCompatActivity {
 
                     builder.setTitle("Select Teams");
 
-                    CharSequence charSeq[] = new CharSequence[ssn.resultsLeague.elementAt(0).league_at_week.size()];
-                    boolean checkedItems[] = new boolean[ssn.resultsLeague.elementAt(0).league_at_week.size()];
-                    for(int i = 0; i < ssn.resultsLeague.elementAt(0).league_at_week.size(); i++){
-                        charSeq[i] = ssn.resultsLeague.elementAt(0).league_at_week.elementAt(i).team_name;
+                    CharSequence charSeq[] = new CharSequence[season.resultsLeague.elementAt(0).league_at_week.size()];
+                    boolean checkedItems[] = new boolean[season.resultsLeague.elementAt(0).league_at_week.size()];
+                    for(int i = 0; i < season.resultsLeague.elementAt(0).league_at_week.size(); i++){
+                        charSeq[i] = season.resultsLeague.elementAt(0).league_at_week.elementAt(i).team_name;
                         checkedItems[i] = true;
                     }
 
@@ -295,7 +403,7 @@ public class Results extends AppCompatActivity {
                         @Override
                         public void onClick(DialogInterface dialog, int which, boolean isChecked) {
                             //ToDo: edit which lines are shown in graph
-                            String teamName = String.valueOf( ssn.resultsLeague.elementAt(0).league_at_week.elementAt(which));
+                            String teamName = String.valueOf( season.resultsLeague.elementAt(0).league_at_week.elementAt(which));
 
                             if(isChecked){
                                 setOfTeamNames.add(teamName);
@@ -310,7 +418,7 @@ public class Results extends AppCompatActivity {
                     Graph graph = new Graph.Builder().build();
 
                     for(int i = 0; i < setOfTeamNames.size(); i++) {
-                        Vector<Point> newLine = ssn.getPoints(x[0], y[0], setOfTeamNames.elementAt(i));
+                        Vector<Point> newLine = season.getPoints(x[0], y[0], setOfTeamNames.elementAt(i));
 
                         graph = new Graph.Builder().addLineGraph(newLine).build();
                     }
@@ -318,6 +426,82 @@ public class Results extends AppCompatActivity {
                     graphView.setGraph(graph);
                 }
             } );
+        }
+
+        public void destroy() {
+            graphView.setVisibility(View.GONE);
+        }
+    }
+
+    public class ResultsListViews {
+        public Season season;
+
+        public LinearLayout linearLayout;
+
+        public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState){
+            linearLayout = view.findViewById(R.id.linear_layout);
+
+            TableLayout classification0 = view.findViewById(R.id.C0_list);
+            TableLayout classification1 = view.findViewById(R.id.C1_list);
+            TableLayout classification2 = view.findViewById(R.id.C2_list);
+            TableLayout matchResults = view.findViewById(R.id.match_results);
+
+            Season.League finalResult = season.resultsLeague.lastElement();
+
+            int n = finalResult.league_at_week.size();
+
+            Context context = view.getContext();
+
+            for(int i = 0; i < n; i++) {
+                TableRow item = new TableRow(context);
+
+                TextView position = new TextView(context);
+                position.setText(i);
+                item.addView(position, 0);
+
+                TextView teamName = new TextView(context);
+                teamName.setText(finalResult.league_at_week.elementAt(i).team_name);
+                item.addView(teamName, 1);
+
+                if(i < 4) {
+                    //Promoted set 1
+                    classification0.addView(item);
+                }
+                else if(i >= 4 && i < 7) {
+                    //Promoted set 2
+                    classification1.addView(item);
+                }
+                else if(i > n - 4) {
+                    //Relegated
+                    classification2.addView(item);
+                }
+            }
+
+            for(int j = 0; j < season.matchResults.size(); j++) {
+                TableRow matchItem = new TableRow(context);
+
+                TextView homeTeam = new TextView(context);
+                homeTeam.setText(season.matchResults.elementAt(j).home.team_name);
+                matchItem.addView(homeTeam, 0);
+
+                TextView homeScore = new TextView(context);
+                homeScore.setText(season.matchResults.elementAt(j).score.firstElement());
+                matchItem.addView(homeScore, 1);
+
+                TextView awayScore = new TextView(context);
+                awayScore.setText(season.matchResults.elementAt(j).score.lastElement());
+                matchItem.addView(awayScore, 2);
+
+                TextView awayTeam = new TextView(context);
+                awayTeam.setText(season.matchResults.elementAt(j).away.team_name);
+                matchItem.addView(awayTeam, 3);
+
+                matchResults.addView(matchItem);
+            }
+        }
+
+        public void destroy() {
+            linearLayout.setVisibility(View.GONE);
         }
     }
 }

@@ -14,7 +14,7 @@ public class Loading extends AppCompatActivity {
 
 
     //ToDo: Process for progress bar and cancel button
-
+    //Default constructor
     public Loading(String training_set_dir, String test_set_dir){
         //Opens Loading screen and processes data files
         Bundle newSavedInstanceState = new Bundle();
@@ -24,6 +24,11 @@ public class Loading extends AppCompatActivity {
 
         //ToDo: Add code that computes "arff_to_league(training_set_dir, test_set_dir)"
         call_cpp(training_set_dir, test_set_dir);
+
+
+        Season ssn = new Season();
+
+
     }
 
     public native void call_cpp(String train, String test);

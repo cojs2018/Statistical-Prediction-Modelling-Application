@@ -25,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
 
                 //ToDo: Open new loading activity and process files
                 Loading start = new Loading(training_set.file_name, test_set.file_name);
+
             }
         } );
 
