@@ -53,22 +53,11 @@
         android:id="@+id/startNew"
         android:layout_width="252dp"
         android:layout_height="48dp"
-        android:layout_marginBottom="44dp"
+        android:layout_marginBottom="56dp"
         android:text="Start new data visualization"
-        app:layout_constraintBottom_toTopOf="@+id/loadExisting"
+        app:layout_constraintBottom_toTopOf="@+id/readme"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.496"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/loadExisting"
-        android:layout_width="252dp"
-        android:layout_height="48dp"
-        android:layout_marginBottom="44dp"
-        android:text="Load existing data"
-        app:layout_constraintBottom_toTopOf="@+id/readme"
-        app:layout_constraintEnd_toStartOf="@+id/guideline2"
-        app:layout_constraintHorizontal_bias="0.552"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button

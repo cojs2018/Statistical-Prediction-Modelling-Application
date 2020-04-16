@@ -1,8 +1,14 @@
 package com.example.statisticalpredictionmodellingapplication;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 
 public class Loading extends AppCompatActivity {
 
@@ -12,24 +18,34 @@ public class Loading extends AppCompatActivity {
         setContentView(R.layout.activity_loading);
     }
 
-
-    //ToDo: Process for progress bar and cancel button
     //Default constructor
+    @RequiresApi(api = Build.VERSION_CODES.N)
     public Loading(String training_set_dir, String test_set_dir){
         //Opens Loading screen and processes data files
         Bundle newSavedInstanceState = new Bundle();
         this.onCreate(newSavedInstanceState);
+        View view = new View(this);
 
-        //System.loadLibrary("ArffData");
+        //Add code that computes "arff_to_league(training_set_dir, test_set_dir)"
+        Season season = new Season();
 
-        //ToDo: Add code that computes "arff_to_league(training_set_dir, test_set_dir)"
-        call_cpp(training_set_dir, test_set_dir);
+        season.getArff(training_set_dir, test_set_dir);
 
-
-        Season ssn = new Season();
-
-
+        Results results = new Results(season);
     }
 
-    public native void call_cpp(String train, String test);
+    //Process for progress bar and cancel button
+    public class LoadingCancel {
+        protected void OnViewCreate(@NonNull View view, @Nullable Bundle savedInstanceState) {
+            Button cancel = findViewById(R.id.Cancel);
+
+            cancel.setOnClickListener( new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //Return to main activity
+                    MainActivity goBack = new MainActivity();
+                }
+            } );
+        }
+    }
 }

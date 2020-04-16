@@ -1,46 +1,38 @@
 package com.example.statisticalpredictionmodellingapplication;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-//import androidx.fragment.app.FragmentStatePagerAdapter;
-import androidx.viewpager.widget.ViewPager;
-import androidx.viewpager2.adapter.FragmentStateAdapter;
-
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.media.Image;
-import android.net.sip.SipSession;
-import android.opengl.Matrix;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import com.google.android.material.tabs.TabItem;
-import com.google.android.material.tabs.TabLayout;
-//import com.google.android.material.tabs.TabLayoutMediator;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
 
-import com.softmoore.android.graphlib.Function;
+import com.example.statisticalpredictionmodellingapplication.Kotlin.Matrix;
+import com.google.android.material.tabs.TabLayout;
 import com.softmoore.android.graphlib.Graph;
 import com.softmoore.android.graphlib.GraphView;
-import com.softmoore.android.graphlib.Label;
 import com.softmoore.android.graphlib.Point;
 
 import java.util.Vector;
+
+//import androidx.fragment.app.FragmentStatePagerAdapter;
+//import com.google.android.material.tabs.TabLayoutMediator;
 
 public class Results extends AppCompatActivity {
 
@@ -57,22 +49,25 @@ public class Results extends AppCompatActivity {
 
 
     //Default constructor
-    public Results() {
-        CollectionResultsFragment collectionResultsFragment = new CollectionResultsFragment();
-
+    public Results(Season season) {
+        CollectionResultsFragment collectionResultsFragment = new CollectionResultsFragment(season);
     }
 
 
     public class CollectionResultsFragment extends Fragment {
+        Season season;
+
         ResultsCollectionAdapter resultsCollectionAdapter;
         ViewPager viewPager;
 
         //Default constructor
-        public CollectionResultsFragment() {
+        public CollectionResultsFragment(Season season) {
             LayoutInflater inflater = getLayoutInflater();
 
             ViewGroup container = null;
             Bundle thisInstanceState = null;
+
+            this.season = season;
 
             onCreate(inflater, container, thisInstanceState);
         }
@@ -117,19 +112,23 @@ public class Results extends AppCompatActivity {
                         //Display first plane
                         resultsTableLayout = new ResultsTableLayout();
                         resultsTableLayout.x = 0; //Set table at initial data;
+                        resultsTableLayout.season = season;
                         resultsTableLayout.onViewCreated(view, savedInstanceState);
 
                         resultsSeekBar = new ResultsSeekBar();
+                        resultsSeekBar.season = season;
                         resultsSeekBar.onViewCreated(view, savedInstanceState);
                     }
                     else if (tabLayout.getSelectedTabPosition() == 1) {
                         //Display second plane
                         resultsGraphView = new ResultsGraphView();
+                        resultsGraphView.season = season;
                         resultsGraphView.onViewCreated(view, savedInstanceState);
                     }
                     else if (tabLayout.getSelectedTabPosition() == 2) {
                         //Display third plane
                         resultsListViews = new ResultsListViews();
+                        resultsListViews.season = season;
                         resultsListViews.onViewCreated(view, savedInstanceState);
                     }
                 }
@@ -484,17 +483,24 @@ public class Results extends AppCompatActivity {
                 homeTeam.setText(season.matchResults.elementAt(j).home.team_name);
                 matchItem.addView(homeTeam, 0);
 
+                Matrix score = season.matchResults.elementAt(j).result.coefficients.index_times(
+                        season.matchResults.elementAt(j).result.xvar);
+
                 TextView homeScore = new TextView(context);
-                homeScore.setText(season.matchResults.elementAt(j).score.firstElement());
+                homeScore.setText(score.get(0, 0));
                 matchItem.addView(homeScore, 1);
 
+                TextView vs = new TextView(context);
+                vs.setText(" - ");
+                matchItem.addView(vs, 2);
+
                 TextView awayScore = new TextView(context);
-                awayScore.setText(season.matchResults.elementAt(j).score.lastElement());
-                matchItem.addView(awayScore, 2);
+                awayScore.setText(score.get(1, 0));
+                matchItem.addView(awayScore, 3);
 
                 TextView awayTeam = new TextView(context);
                 awayTeam.setText(season.matchResults.elementAt(j).away.team_name);
-                matchItem.addView(awayTeam, 3);
+                matchItem.addView(awayTeam, 4);
 
                 matchResults.addView(matchItem);
             }

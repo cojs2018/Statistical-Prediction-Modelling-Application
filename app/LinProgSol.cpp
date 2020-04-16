@@ -43,7 +43,7 @@ public solution program::linear(VectorXi Coeffs, MatrixXi Contstraints, Vector2i
             zz = (C_B.transpose() * Binv * N.columns(j)) - C_N(j);
 
             if(zz < prev_zz && zz < 0) {
-                prev_z = zz;
+                prev_zz = zz;
                 prev_enter = enter;
                 enter = j;
             }

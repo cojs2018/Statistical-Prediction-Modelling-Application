@@ -158,7 +158,7 @@ namespace MATH
 			return I;
 		}
 
-		Matrix inverse() { //Get invese of matrix using Gaussian elimination
+		Matrix inverse() { //Get inverse of matrix using Gaussian elimination
 			Matrix A = *this;
 
 			if (A.size[0] == A.size[1]) { //If matrix A is square
@@ -172,6 +172,7 @@ namespace MATH
 						int a_ij = A.matrix.at(i).at(j);
 						for (int k = i; k < n; k++) {
 							A.matrix.at(j).at(k) += -1 * (a_ij / a_ii) * A.matrix.at(i).at(k);
+							I.matrix.at(j).at(k) += -1 * (a_ij / a_ii) * I.matrix.at(i).at(k);
 						}
 					}
 				}
@@ -183,6 +184,7 @@ namespace MATH
 							int a_ij = A.matrix.at(i).at(j);
 							for (int k = i; k >= 0; k--) {
 								A.matrix.at(j).at(k) += -1 * (a_ij / a_ii) * A.matrix.at(i).at(k);
+								I.matrix.at(j).at(k) += -1 * (a_ij / a_ii) * I.matrix.at(i).at(k);
 							}
 						}
 					}
