@@ -41,6 +41,9 @@ public class Results extends AppCompatActivity {
     public ResultsGraphView resultsGraphView;
     public ResultsListViews resultsListViews;
 
+    //Default constructor
+    public Results() {/*Unused*/}
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,8 +71,6 @@ public class Results extends AppCompatActivity {
             Bundle thisInstanceState = null;
 
             this.season = season;
-
-            onCreate(inflater, container, thisInstanceState);
         }
 
         @Nullable

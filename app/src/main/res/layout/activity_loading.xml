@@ -34,14 +34,6 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_begin="655dp" />
 
-    <com.google.android.gms.ads.AdView
-        android:id="@+id/adView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@+id/guideline9"
-        app:layout_constraintEnd_toStartOf="@+id/guideline6"
-        app:layout_constraintStart_toStartOf="@+id/guideline5" />
-
     <ProgressBar
         android:id="@+id/progressBar"
         style="?android:attr/progressBarStyle"
@@ -69,14 +61,15 @@
         android:id="@+id/Cancel"
         android:layout_width="124dp"
         android:layout_height="78dp"
-        android:layout_marginBottom="80dp"
         android:text="Cancel"
-        app:layout_constraintBottom_toTopOf="@+id/adView"
+        app:layout_constraintBottom_toTopOf="@+id/guideline9"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.491"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/loadTxt"
+        app:layout_constraintVertical_bias="0.295" />
 
-    <TextureView
+    <!--TextureView
         android:id="@+id/textureView"
         android:layout_width="0dp"
         android:layout_height="72dp"
@@ -84,5 +77,5 @@
         android:foreground="#633974"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" -->
 </androidx.constraintlayout.widget.ConstraintLayout>

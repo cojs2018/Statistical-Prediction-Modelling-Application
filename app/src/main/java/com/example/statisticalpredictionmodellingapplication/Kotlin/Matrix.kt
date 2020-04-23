@@ -458,7 +458,7 @@ class Matrix {
         return Res
     }
 
-    override fun toString(): String { //Converts matrix to string format
+   /* override fun toString(): String { //Converts matrix to string format
         val n = this.size[0]
         val m = this.size[1]
 
@@ -472,7 +472,7 @@ class Matrix {
         }
 
         return Res
-    }
+    }*/
 
     fun fail(message: String): Nothing {
         throw IllegalAccessException(message)

@@ -3,6 +3,7 @@ package com.example.statisticalpredictionmodellingapplication;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -12,8 +13,8 @@ public class MainActivity extends AppCompatActivity {
 
     public MainActivity() {
         // Default constructor
-        Bundle thisInstanceState = new Bundle();
-        this.onCreate(thisInstanceState);
+        //Bundle thisInstanceState = new Bundle();
+        //this.onCreate(thisInstanceState);
     }
 
     @Override
@@ -26,14 +27,7 @@ public class MainActivity extends AppCompatActivity {
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onClick(View v) {
-                arff_file training_set = null;
-                arff_file test_set = null;
-
-                training_set.getFile();
-                test_set.getFile();
-
-                //Open new loading activity and process files
-                Loading start = new Loading(training_set.file_name, test_set.file_name);
+                startActivity(new Intent(MainActivity.this, Loading.class));
             }
         } );
 
@@ -43,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 //Display read_me.txt on screen
                 ReadMeActivity readme = new ReadMeActivity();
+                startActivity(new Intent(MainActivity.this, ReadMeActivity.class));
             }
         } );
     }

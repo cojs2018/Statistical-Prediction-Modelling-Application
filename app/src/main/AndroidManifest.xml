@@ -11,7 +11,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".ReadMeActivity"></activity>
+        <!-- Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713 -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3401746284933472~3277349817"/>
+        <activity android:name=".ReadMeActivity"/>
         <activity android:name=".Results" />
         <activity android:name=".Loading" />
         <activity android:name=".MainActivity">

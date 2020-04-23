@@ -1,6 +1,7 @@
 package com.example.statisticalpredictionmodellingapplication;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Scroller;
@@ -19,7 +20,7 @@ import java.io.FileReader;
 public class ReadMeActivity extends AppCompatActivity {
 
     public ReadMeActivity() { //Default constructor
-        this.onCreate(new Bundle());
+
     }
 
     @Override
@@ -61,7 +62,7 @@ public class ReadMeActivity extends AppCompatActivity {
         backButton.setOnClickListener( new View.OnClickListener() {
             @Override
             public void onClick(View v) { //Go back to main menu
-                MainActivity goBackToMain = new MainActivity();
+                startActivity(new Intent(ReadMeActivity.this, MainActivity.class));
             }
         } );
     }

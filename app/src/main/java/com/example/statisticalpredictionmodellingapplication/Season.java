@@ -33,13 +33,16 @@ public class Season {
         //Gets data from .arff files
         File file;
 
+        String tr_set = "\\internal storage\\Downloads\\Test\\EPL-13-03-2020.arff";
+        String t_set = "\\internal storage\\Downloads\\Test\\EPL-MATCHES.arff";
+
         League newLeague = new League();
 
         Matrix matrix = new Matrix();
 
         try {
             //Get data from training set
-            file = new File(training_set_dir);
+            file = new File(tr_set); //training_set_dir);
             FileReader in = new FileReader(file);
 
             while(in.read() != -1) {
@@ -94,7 +97,7 @@ public class Season {
             in.close();
 
             //Get data from test set
-            file = new File(test_set_dir);
+            file = new File(t_set); //test_set_dir
             in = new FileReader(file);
 
             while(in.read() != -1) {
@@ -166,11 +169,6 @@ public class Season {
         catch (Exception exe) {
             View view = null;
             Context context = view.getContext();
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(context);
-            builder.setTitle("ERROR: Exception!");
-
-            builder.setMessage(exe.getMessage());
         }
     }
 
