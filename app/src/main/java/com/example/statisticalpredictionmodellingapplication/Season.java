@@ -5,19 +5,21 @@ import android.os.Build;
 import android.view.View;
 
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AlertDialog;
 
 import com.example.statisticalpredictionmodellingapplication.Kotlin.Feasible;
 import com.example.statisticalpredictionmodellingapplication.Kotlin.Matrix;
 import com.softmoore.android.graphlib.Point;
 
 import java.io.File;
-import java.io.FileReader;
 import java.util.Comparator;
 import java.util.Vector;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
+
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.converters.ConverterUtils;
 
 public class Season {
 
@@ -33,131 +35,89 @@ public class Season {
         //Gets data from .arff files
         File file;
 
-        String tr_set = "\\internal storage\\Downloads\\Test\\EPL-13-03-2020.arff";
-        String t_set = "\\internal storage\\Downloads\\Test\\EPL-MATCHES.arff";
-
         League newLeague = new League();
 
         Matrix matrix = new Matrix();
 
         try {
             //Get data from training set
-            file = new File(tr_set); //training_set_dir);
-            FileReader in = new FileReader(file);
+            ConverterUtils.DataSource tsource = new ConverterUtils.DataSource(training_set_dir);
+            Instances tdata = tsource.getDataSet();
 
-            while(in.read() != -1) {
-                char c[] = new char[50];
-                in.read(c);
-                String newLine = "";
-                newLine.concat(c.toString());
+            int pointer = 0;
+            while(pointer < tdata.size()) {
+                Team team = new Team();
+                Instance instance = tdata.get(pointer);
 
-                if(!(newLine.contains("@") || newLine.contains("%"))) {
-                    Team team = new Team();
-
-                    int start = 0;
-                    int index = newLine.indexOf(",");
-                    team.team_name = newLine.substring(start, index - start);
-
-                    start = index + 1;
-                    index = newLine.indexOf(",", start);
-                    team.total_wins = Integer.parseInt( newLine.substring(start, index - start) );
-
-                    start = index + 1;
-                    index = newLine.indexOf(",", start);
-                    team.total_draws = Integer.parseInt( newLine.substring(start, index - start) );
-
-                    start = index + 1;
-                    index = newLine.indexOf(",", start);
-                    team.total_loses = Integer.parseInt( newLine.substring(start, index - start) );
-
-                    start = index + 1;
-                    index = newLine.indexOf(",", start);
-                    team.total_points = Integer.parseInt( newLine.substring(start, index - start) );
-
-                    start = index + 1;
-                    index = newLine.indexOf(",", start);
-                    team.goals_for = Integer.parseInt( newLine.substring(start, index - start) );
-
-                    start = index + 1;
-                    index = newLine.indexOf(",", start);
-                    team.goals_against = Integer.parseInt( newLine.substring(start, index - start) );
-
-                    start = index + 1;
-                    index = newLine.indexOf(",", start);
-                    team.goals_difference = Integer.parseInt( newLine.substring(start, index - start) );
-
-                    start = index + 1;
-                    index = newLine.indexOf(",", start);
-                    team.points_from_5 = Integer.parseInt( newLine.substring(start, index - start) );
-
-                    newLeague.league_at_week.add(team);
+                if(instance.attribute(0).isString()) {
+                    team.team_name = instance.toString(0);
                 }
+
+                team.matches_played = (int) instance.value(1);
+                team.total_wins = (int) instance.value(2);
+                team.total_draws = (int) instance.value(3);
+                team.total_loses = (int) instance.value(4);
+                team.total_points = (int) instance.value(5);
+                team.goals_for = (int) instance.value(6);
+                team.goals_against = (int) instance.value(7);
+                team.goals_difference = (int) instance.value(8);
+                team.points_from_5 = (int) instance.value(9);
+
+                pointer++;
             }
 
-            in.close();
-
             //Get data from test set
-            file = new File(t_set); //test_set_dir
-            in = new FileReader(file);
+            ConverterUtils.DataSource msource = new ConverterUtils.DataSource(test_set_dir);
+            Instances mdata = msource.getDataSet();
 
-            while(in.read() != -1) {
-                char c[] = new char[760];
-                in.read(c);
-                String newLine = "";
-                newLine.concat(c.toString());
+            pointer = 0;
+            while(pointer < mdata.size()) {
+                Instance instance = mdata.get(pointer);
 
-                if(!(newLine.contains("@") || newLine.contains("%"))) {
-                    int week = 0;
-                    int start = 0;
-                    int index = newLine.indexOf(",");
+                String home_team = instance.stringValue(0);
+                Function<Team, Boolean> getTeam = (t) -> (t.team_name == home_team);
+                int h = newLeague.league_at_week.indexOf(getTeam);
+                Team hTeam = newLeague.league_at_week.elementAt(h);
 
-                    String home_team = newLine.substring(start, index - start);
-                    Function<Team, Boolean> getTeam = (t) -> (t.team_name == home_team);
-                    int h = newLeague.league_at_week.indexOf(getTeam);
-                    Team hTeam = newLeague.league_at_week.elementAt(h);
+                int k = 1;
+                while(k < instance.numAttributes()) {
+                    if(!instance.isMissing(k)) {
+                        String away_team = instance.stringValue(k);
+                        getTeam = (t) -> (t.team_name == away_team);
+                        int a = newLeague.league_at_week.indexOf(getTeam);
+                        Team aTeam = newLeague.league_at_week.elementAt(a);
 
-                    while(start < newLine.length()) {
-                        week++;
-                        start = index + 1;
-                        index = newLine.indexOf(",", start);
+                        Match match = new Match();
 
-                        String away_team = newLine.substring(start, index - start);
+                        match.home = hTeam;
+                        match.away = aTeam;
+                        match.week = k;
 
-                        if(away_team != "?") {
-                            getTeam = (t) -> (t.team_name == away_team);
-                            int a = newLeague.league_at_week.indexOf(getTeam);
-                            Team aTeam = newLeague.league_at_week.elementAt(a);
+                        Vector<Integer> v = new Vector<>();
+                        v.add(hTeam.total_wins);
+                        v.add(hTeam.total_draws);
+                        v.add(hTeam.total_loses);
+                        v.add(hTeam.goals_difference);
+                        v.add(hTeam.points_from_5);
+                        v.add(aTeam.total_wins);
+                        v.add(aTeam.total_draws);
+                        v.add(aTeam.total_loses);
+                        v.add(aTeam.goals_difference);
+                        v.add(aTeam.points_from_5);
 
-                            Match match = new Match();
+                        match.Tableau = matrix.setMatrix(v, 5);
 
-                            match.home = hTeam;
-                            match.away = aTeam;
-                            match.week = week;
+                        v.clear();
+                        v.add(hTeam.total_points);
+                        v.add(aTeam.total_points);
 
-                            Vector<Integer> v = new Vector<>();
-                            v.add(hTeam.total_wins);
-                            v.add(hTeam.total_draws);
-                            v.add(hTeam.total_loses);
-                            v.add(hTeam.goals_difference);
-                            v.add(hTeam.points_from_5);
-                            v.add(aTeam.total_wins);
-                            v.add(aTeam.total_draws);
-                            v.add(aTeam.total_loses);
-                            v.add(aTeam.goals_difference);
-                            v.add(aTeam.points_from_5);
+                        match.vector_tpbm_ = matrix.setMatrix(v, 1);
 
-                            match.Tableau = matrix.setMatrix(v, 5);
-
-                            v.clear();
-                            v.add(hTeam.total_points);
-                            v.add(aTeam.total_points);
-
-                            match.vector_tpbm_ = matrix.setMatrix(v, 1);
-
-                            this.matchResults.add(match);
-                        }
+                        this.matchResults.add(match);
                     }
+                    k++;
                 }
+                pointer++;
             }
 
             //Sort match list based on week in ascending order
@@ -172,6 +132,44 @@ public class Season {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void getLeague() {
+        resultsLeague = new Vector<>();
+
+        League table0 = new League();
+
+        table0.league_at_week.add(new Team("Liv",29,27,1,1,82,66,21,45,6));
+        table0.league_at_week.add(new Team("Mct",28,18,3,7,57,68,31,37,12));
+        table0.league_at_week.add(new Team("Lei",29,16,5,8,53,58,28,30,7));
+        table0.league_at_week.add(new Team("Che",29,14,6,9,48,51,39,12,10));
+        table0.league_at_week.add(new Team("Mtd",29,12,9,8,45,44,30,14,13));
+        table0.league_at_week.add(new Team("Wlv",29,10,13,6,43,41,34,7,8));
+        table0.league_at_week.add(new Team("Shf",28,11,10,7,43,30,25,5,13));
+        table0.league_at_week.add(new Team("Ttm",29,11,8,10,41,47,40,7,2));
+        table0.league_at_week.add(new Team("Ars",28,9,13,6,40,40,36,4,12));
+        table0.league_at_week.add(new Team("Bnl",29,11,6,12,39,34,40,-6,9));
+        table0.league_at_week.add(new Team("Cpl",29,10,9,10,39,26,32,-6,9));
+        table0.league_at_week.add(new Team("Evt",29,10,7,12,37,37,46,-9,7));
+        table0.league_at_week.add(new Team("Ncl",29,9,8,12,35,25,41,-16,7));
+        table0.league_at_week.add(new Team("Spt",29,10,4,15,34,35,52,-17,3));
+        table0.league_at_week.add(new Team("Brt",29,6,11,12,29,32,40,-8,4));
+        table0.league_at_week.add(new Team("Whm",29,7,6,16,27,35,50,-15,4));
+        table0.league_at_week.add(new Team("Wfd",29,6,9,14,27,27,44,-17,4));
+        table0.league_at_week.add(new Team("Bmt",29,7,6,16,27,29,47,-18,4));
+        table0.league_at_week.add(new Team("Avl",28,7,4,17,25,34,56,-22,0));
+        table0.league_at_week.add(new Team("Nrc",29,5,6,18,21,25,52,-27,4));
+
+        resultsLeague.add(table0);
+
+        matchResults = new Vector<>();
+
+        matchResults.add(new Match("Mct", "Ars", 1));
+        matchResults.add(new Match("Avl", "Shf", 1));
+
+        completeLeague();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
     public void completeLeague() {
         //Computes the predicted results of each match
         Feasible solution = new Feasible();
@@ -181,7 +179,7 @@ public class Season {
 
         for(Match match: this.matchResults){
             //Create new coefficient vector with all values set to 1
-            Matrix vector_coeff_ = matrix.ones(2, 1);
+            Matrix vector_coeff_ = matrix.ones(5, 1);
 
             //Get the result as an optimal solution through linear programming
             match.result = solution.getSolution(vector_coeff_, match.Tableau, match.vector_tpbm_);
@@ -254,12 +252,11 @@ public class Season {
 
             //Update League
             Function<Team, Boolean> getTeam = (t) -> (t.team_name == match.home.team_name);
-            int h = newTable.league_at_week.indexOf(getTeam);
-            newTable.league_at_week.setElementAt(match.home, h);
+            replace(newTable.league_at_week, getTeam, match.home);
 
             getTeam = (t) -> (t.team_name == match.away.team_name);
             int a = newTable.league_at_week.indexOf(getTeam);
-            newTable.league_at_week.setElementAt(match.away, a);
+            replace(newTable.league_at_week, getTeam, match.home);
 
             //Add new entry to results league
             if(match == this.matchResults.lastElement()) {
@@ -308,6 +305,10 @@ public class Season {
 
     public class League {
         public Vector<Team> league_at_week;
+
+        public League() {
+            this.league_at_week = new Vector<>();
+        }
     }
 
     public class Team {
@@ -321,6 +322,23 @@ public class Season {
         public int goals_against;
         public int goals_difference;
         public int points_from_5;
+
+        public Team(String t_n, int mp, int w, int d, int l, int tp, int gf, int ga, int gd, int p5) {
+            this.team_name = t_n;
+            this.matches_played = mp;
+            this.total_wins = w;
+            this.total_draws = d;
+            this.total_loses = l;
+            this.total_points = tp;
+            this.goals_for = gf;
+            this.goals_against = ga;
+            this.goals_difference = gd;
+            this.points_from_5 = p5;
+        }
+
+        public Team() {
+
+        }
 
         public int getAxis(int z) {
             int result = 0;
@@ -370,6 +388,66 @@ public class Season {
         public Feasible result;
 
         public int week;
+
+        public Match() {
+
+        }
+
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        public Match(String home_team, String away_team, int k) {
+            Function<Team, Boolean> getTeam = (t) -> (t.team_name == home_team);
+            Team hTeam = extract(resultsLeague.firstElement().league_at_week, getTeam);
+
+            getTeam = (t) -> (t.team_name == away_team);
+            int a = resultsLeague.firstElement().league_at_week.indexOf(getTeam);
+            Team aTeam = extract(resultsLeague.firstElement().league_at_week, getTeam);
+
+            this.home = hTeam;
+            this.away = aTeam;
+            this.week = k;
+
+            Vector<Integer> v = new Vector<>();
+            v.add(hTeam.total_wins);
+            v.add(hTeam.total_draws);
+            v.add(hTeam.total_loses);
+            v.add(hTeam.goals_difference);
+            v.add(hTeam.points_from_5);
+            v.add(aTeam.total_wins);
+            v.add(aTeam.total_draws);
+            v.add(aTeam.total_loses);
+            v.add(aTeam.goals_difference);
+            v.add(aTeam.points_from_5);
+
+            Matrix matrix = new Matrix();
+            this.Tableau = matrix.setMatrix(v, 5);
+
+            v.clear();
+            v.add(hTeam.total_points);
+            v.add(aTeam.total_points);
+
+            this.vector_tpbm_ = matrix.setMatrix(v, 1);
+        }
+
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public Team extract(Vector<Team> vector, Function<Team, Boolean> fn) {
+        for(int i = 0; i < vector.size(); i++) {
+            Team t = vector.elementAt(i);
+            if(fn.apply(t)) {
+                return t;
+            }
+        }
+        return null;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void replace(Vector<Team> vector, Function<Team, Boolean> fn, Team team) {
+        for(int i = 0; i < vector.size(); i++) {
+            Team t = vector.elementAt(i);
+            if(fn.apply(t)) {
+                vector.setElementAt(team, i);
+            }
+        }
+    }
 }

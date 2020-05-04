@@ -7,28 +7,22 @@
     android:layout_height="match_parent"
     tools:context=".Results">
 
-    <!--TextureView
-        android:id="@+id/textureView2"
-        android:layout_width="0dp"
-        android:layout_height="72dp"
-        android:background="#633974"
-        android:foreground="#633974"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" -->
 
     <LinearLayout
-        android:layout_width="416dp"
-        android:layout_height="660dp"
+        android:id="@+id/linearLayout3"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tab_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:visibility="visible">
 
             <com.google.android.material.tabs.TabItem
                 android:id="@+id/tab_table"
@@ -57,31 +51,30 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:scrollbarAlwaysDrawVerticalTrack="true"
-            android:visibility="visible">
+            android:visibility="gone">
 
             <ListView
                 android:id="@+id/C0_list"
                 style="@style/Widget.AppCompat.ListView"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
             <ListView
                 android:id="@+id/C1_list"
                 style="@style/Widget.AppCompat.ListView"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
             <ListView
                 android:id="@+id/C2_list"
                 style="@style/Widget.AppCompat.ListView"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content" />
 
             <TableLayout
                 android:id="@+id/match_results"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent">
-            </TableLayout>
+                android:layout_height="match_parent"></TableLayout>
 
         </LinearLayout>
 
@@ -90,7 +83,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:stretchColumns="*"
-            android:visibility="gone">
+            android:visibility="visible">
 
             <TableRow android:id="@+id/cloumn_headers">
 
@@ -124,13 +117,13 @@
             android:id="@+id/seek_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone" />
+            android:visibility="visible" />
 
         <com.softmoore.android.graphlib.GraphView
             android:id="@+id/graph_view"
             android:layout_width="wrap_content"
             android:layout_height="446dp"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -167,31 +160,5 @@
         </androidx.viewpager2.widget.ViewPager2>
 
     </LinearLayout>
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/floatingActionButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
-        android:clickable="true"
-        android:tint="#FFFFFF"
-        app:backgroundTint="#633974"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="?attr/homeAsUpIndicator" />
-
-    <TextView
-        android:id="@+id/textView3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
-        android:text="Results"
-        android:textColor="#FFFFFF"
-        android:textSize="24sp"
-        app:layout_constraintBottom_toBottomOf="@+id/textureView2"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/textureView2" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

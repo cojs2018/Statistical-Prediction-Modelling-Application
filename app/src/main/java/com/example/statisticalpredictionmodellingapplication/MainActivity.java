@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, Loading.class));
+                startActivity(new Intent(MainActivity.this, Display_Results.class));
             }
         } );
 

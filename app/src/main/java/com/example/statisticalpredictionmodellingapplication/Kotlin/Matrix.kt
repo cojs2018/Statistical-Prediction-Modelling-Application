@@ -13,7 +13,7 @@ class Matrix {
         val m = cutoff
         val n = v.size / cutoff
 
-        var matrix = zero(n, m);
+        var matrix = Matrix().zero(n, m)
         var it = 0 //iterator
         while(it < m*n) {
             var i = it / m
@@ -31,9 +31,9 @@ class Matrix {
     fun zero(n: Int, m: Int): Matrix {
         //Creates a zero matrix of dimensions n x m
 
-        for(i in 0..n) {
+        for(i in 0 until n) {
             var row = ArrayList<Int>()
-            for (j in 0..m) {
+            for (j in 0 until m) {
                 row.add(0)
             }
             this.data.add(row)
@@ -48,9 +48,9 @@ class Matrix {
     fun ones(n: Int, m: Int): Matrix {
         //Creates a one matrix of dimensions n x m
 
-        for(i in 0..n) {
+        for(i in 0 until n) {
             var row = ArrayList<Int>()
-            for (j in 0..m) {
+            for (j in 0 until m) {
                 row.add(1)
             }
             this.data.add(row)
@@ -63,9 +63,9 @@ class Matrix {
     }
 
     fun identity(n: Int): Matrix { //Returns identity matrix of dimensions n x n
-        var Res = zero(n, n)
+        var Res = Matrix().zero(n, n)
 
-        for(i in 0..n) {
+        for(i in 0 until n) {
             Res[i, i] = 1
         }
 
@@ -83,16 +83,16 @@ class Matrix {
         var vector: Matrix
 
         if(cORr == 'c') {
-            vector = zero(n, 1)
+            vector = Matrix().zero(n, 1)
 
-            for (i in 0..n) {
-                vector[i, j] = this[i, j]
+            for (i in 0 until n) {
+                vector[i, 0] = this[i, j]
             }
         }
         else if(cORr == 'r') {
-            vector = zero(1, m)
+            vector = Matrix().zero(1, m)
 
-            for (i in 0..m) {
+            for (i in 0 until m) {
                 vector[j, i] = this[j, i]
             }
         }
@@ -115,13 +115,13 @@ class Matrix {
 
         if(cORr == 'c') {
 
-            for (i in 0..n) {
+            for (i in 0 until n) {
                 this[i, j] = Obj[i, j]
             }
         }
         else if(cORr == 'r') {
 
-            for (i in 0..m) {
+            for (i in 0 until m) {
                 this[j, i] = this[j, i]
             }
         }
@@ -141,13 +141,16 @@ class Matrix {
             }
         }
 
-        if(n == this.size[1]) {
-            if(n == 1) {
-                return this[1, 1]
+        if(n == this.size[1] && n > 0) {
+            if (n == 2) {
+                return (this[0, 0] * this[1, 1]) - (this[0, 1] * this[1, 0])
+            }
+            else if (n == 1) {
+                return this[0, 0]
             }
             else {
-                var det = 0
-                for(j in 0..n) {
+                var det = 0;
+                for(j in 0 until n) {
                     det += adjsign(j) * this[0, j] * this(0, j).invoke()
                 }
 
@@ -165,21 +168,21 @@ class Matrix {
         val n = this.size[0]
         val m = this.size[1]
 
-        var Res = zero(n-1, m-1)
+        var Res = Matrix().zero(n-1, m-1)
 
-        for(i in 0..r) {
-            for(j in 0..c) {
+        for(i in 0 until r) {
+            for(j in 0 until c) {
                 Res[i, j] = this[i, j]
             }
-            for(j in (c+1)..m) {
+            for(j in (c+1) until m) {
                 Res[i, j-1] = this[i, j]
             }
         }
-        for(i in (r+1)..n) {
+        for(i in (r+1) until n) {
             for(j in 0..c) {
                 Res[i-1, j] = this[i, j]
             }
-            for(j in (c+1)..m) {
+            for(j in (c+1) until m) {
                 Res[i-1, j-1] = this[i, j]
             }
         }
@@ -191,11 +194,11 @@ class Matrix {
         val n = this.size[0]
         val m = this.size[1]
 
-        var Res = zero(n, m)
+        var Res = Matrix().zero(n, m)
 
         if(n == Obj.size[0] && m == Obj.size[1]) {
-            for(i in 0..n) {
-                for(j in 0..m){
+            for(i in 0 until n) {
+                for(j in 0 until m){
                     Res[i, j] = this[i, j] + Obj[i, j]
                 }
             }
@@ -211,11 +214,11 @@ class Matrix {
         val n = this.size[0]
         val m = this.size[1]
 
-        var Res = zero(n, m)
+        var Res = Matrix().zero(n, m)
 
         if(n == Obj.size[0] && m == Obj.size[1]) {
-            for(i in 0..n) {
-                for(j in 0..m){
+            for(i in 0 until n) {
+                for(j in 0 until m){
                     Res[i, j] = this[i, j] - Obj[i, j]
                 }
             }
@@ -231,18 +234,20 @@ class Matrix {
         val n = this.size[0]
         val m = this.size[1]
 
-        val nb = Obj.size[0]
-        val mb = Obj.size[1]
+        val r = Obj.size[0]
+        val s = Obj.size[1]
 
-        var Res = zero(n, mb)
+        if(Obj eq Matrix().identity(r)) {
+            return this
+        }
 
-        if(m == nb) {
-            for(i in 0..n) {
-                for(jb in 0..mb) {
-                    for(ib in 0..nb) {
-                        for(j in 0..m) {
-                            Res[i, jb] += this[i, j] * Obj[ib, j]
-                        }
+        var Res = Matrix().zero(n, s)
+
+        if(m == r) {
+            for(i in 0 until n) {
+                for(j in 0 until s) {
+                    for(k in 0 until minOf(m, r)) {
+                        Res[i, j] += this[i, k] * Obj[k, j]
                     }
                 }
             }
@@ -258,10 +263,10 @@ class Matrix {
         val n = this.size[0]
         val m = this.size[1]
 
-        var Res = zero(n, m)
+        var Res = Matrix().zero(n, m)
 
-        for(i in 0..n) {
-            for(j in 0..m) {
+        for(i in 0 until n) {
+            for(j in 0 until m) {
                 Res[i, j] = obj * this[i, j]
             }
         }
@@ -269,14 +274,29 @@ class Matrix {
         return Res
     }
 
+    infix fun eq (Obj: Matrix): Boolean {
+        val n = this.size[0]
+        val m = this.size[1]
+
+        for(i in 0 until n) {
+            for(j in 0 until m) {
+                if(Obj[i, j] != this[i, j]) {
+                    return false
+                }
+            }
+        }
+
+        return true
+    }
+
     fun transpose(): Matrix { //Transpose matrix
         val n = this.size[0]
         val m = this.size[1]
 
-        var Res = zero(m, n)
+        var Res = Matrix().zero(m, n)
 
-        for(i in 0..n) {
-            for(j in 0..m) {
+        for(i in 0 until n) {
+            for(j in 0 until m) {
                 Res[j, i] = this[i, j]
             }
         }
@@ -309,7 +329,11 @@ class Matrix {
         val n = this.size[0]
         val m = this.size[1]
 
-        var Res = identity(n) //Identity matrix
+        var Res = Matrix().identity(n) //Identity matrix
+
+        if(Res eq this) {
+            return this
+        }
 
         if(n == m) {
             if(this() != 0) {
@@ -369,27 +393,30 @@ class Matrix {
         var temp0 = A[j0, 'c']
         var temp1 = B[j1, 'c']
 
-        A[j0, 'c'] = temp1
-        B[j1, 'c'] = temp0
+        A[0, j0] = temp1[0, 0]
+        A[1, j0] = temp1[1, 0]
+
+        B[0, j1] = temp0[0, 0]
+        B[1, j1] = temp1[1, 0]
     }
 
     fun swap_row(A: Matrix, B: Matrix, i0: Int, i1: Int) {
-        var temp0 = A[i0, 'r']
-        var temp1 = B[i1, 'r']
+        var temp0 = A[i0, 0]
+        var temp1 = B[i1, 0]
 
-        A[i0, 'r'] = temp1
-        B[i1, 'r'] = temp0
+        A[i0, 0] = temp1
+        B[i1, 0] = temp0
     }
 
     fun index_times(Obj: Matrix): Matrix { //Multiplies in each index rather than in matrix multiplication
         val n = this.size[0]
         val m = this.size[0]
 
-        var Res = zero(n, m)
+        var Res = Matrix().zero(n, m)
 
         if(n == Obj.size[0] && m == Obj.size[1]) {
-            for(i in 0..n)
-                for(j in 0..m)
+            for(i in 0 until n)
+                for(j in 0 until m)
                     Res[i, j] = this[i, j] * Obj[i, j]
         }
         else {
@@ -426,7 +453,7 @@ class Matrix {
         var pred = (m == 1) && (Obj.size[1] == 1) && (n == Obj.size[0])
 
         if(pred) {
-            for(i in 0..n step 3) {
+            for(i in 0 until n step 3) {
                 var I = zero(2, 2)
                 var J = zero(2, 2)
                 var K = zero(2, 2)

@@ -3,6 +3,7 @@ package com.example.statisticalpredictionmodellingapplication;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -20,10 +21,9 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import androidx.viewpager.widget.ViewPager;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
-import com.example.statisticalpredictionmodellingapplication.Kotlin.Matrix;
 import com.google.android.material.tabs.TabLayout;
 import com.softmoore.android.graphlib.Graph;
 import com.softmoore.android.graphlib.GraphView;
@@ -31,10 +31,8 @@ import com.softmoore.android.graphlib.Point;
 
 import java.util.Vector;
 
-//import androidx.fragment.app.FragmentStatePagerAdapter;
-//import com.google.android.material.tabs.TabLayoutMediator;
-
 public class Results extends AppCompatActivity {
+    Season season;
 
     public ResultsTableLayout resultsTableLayout;
     public ResultsSeekBar resultsSeekBar;
@@ -44,16 +42,49 @@ public class Results extends AppCompatActivity {
     //Default constructor
     public Results() {/*Unused*/}
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_results);
-    }
+        super.onCreate( savedInstanceState );
+        setContentView( R.layout.activity_results );
 
+        View view = new View( this );
+
+        try {
+            //ACTION_GET_CONTENT is the intent to choose a file via the system browser.
+            Intent intent0 = new Intent( Intent.ACTION_GET_CONTENT );
+            //Filter to only show results that can be opened
+            intent0.addCategory( Intent.CATEGORY_OPENABLE );
+            //Only show files of type .arff
+            intent0.setType( "*/*" );
+            //startActivityForResult( intent0, PICKFILE_RESULT_CODE );
+
+            Intent intent1 = new Intent( Intent.ACTION_GET_CONTENT );
+            intent1.addCategory( Intent.CATEGORY_OPENABLE );
+            intent1.setType( "*/*" );
+            //startActivityForResult( intent1, PICKFILE_RESULT_CODE );
+
+            Season season = new Season();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                season.getLeague();
+            }
+
+            CollectionResultsFragment collectionResultsFragment = new CollectionResultsFragment(season, view, savedInstanceState);
+
+            LinearLayout linlayout = view.findViewById(R.id.linearLayout3);
+
+            //collectionResultsFragment.enable(view, savedInstanceState);
+        }
+        catch(Exception exe) {
+            androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(view.getContext());
+            builder.setTitle("ERROR: Exception!");
+            builder.setMessage(exe.getMessage());
+        }
+    }
 
     //Default constructor
     public Results(Season season) {
-        CollectionResultsFragment collectionResultsFragment = new CollectionResultsFragment(season);
+        //CollectionResultsFragment collectionResultsFragment = new CollectionResultsFragment(season);
     }
 
 
@@ -61,44 +92,40 @@ public class Results extends AppCompatActivity {
         Season season;
 
         ResultsCollectionAdapter resultsCollectionAdapter;
-        ViewPager viewPager;
+        ViewPager2 viewPager;
 
-        //Default constructor
-        public CollectionResultsFragment(Season season) {
-            LayoutInflater inflater = getLayoutInflater();
-
-            ViewGroup container = null;
-            Bundle thisInstanceState = null;
-
+        public CollectionResultsFragment(Season season, View view, Bundle savedInstanceState) {
             this.season = season;
         }
 
         @Nullable
-        //@Override
-        public View onCreate(@NonNull LayoutInflater inflator, @Nullable ViewGroup container,
+        @Override
+        public View onCreateView(@NonNull LayoutInflater inflator, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
             return inflator.inflate(R.layout.activity_results, container, false);
         }
 
-        @Override
-        public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        public void enable(View view, Bundle savedInstanceState) {
             resultsCollectionAdapter = new ResultsCollectionAdapter(this);
             viewPager = view.findViewById(R.id.pager);
-            //viewPager.setAdapter( resultsCollectionAdapter);
+            viewPager.setAdapter( resultsCollectionAdapter);
 
             TabLayout tabLayout = view.findViewById(R.id.tab_layout);
 
             TabLayout.Tab tableTab = new TabLayout.Tab();
             tableTab.setText("TABLE");
             tabLayout.addTab(tableTab, 0, true); //Default plane
+            tabLayout.addView(view.findViewById(R.id.tab_table));
 
             TabLayout.Tab graphTab = new TabLayout.Tab();
             graphTab.setText("GRAPH");
             tabLayout.addTab(graphTab, 1, false);
+            tabLayout.addView(view.findViewById(R.id.tab_graph));
 
             TabLayout.Tab resultsTab = new TabLayout.Tab();
             resultsTab.setText("RESULTS");
             tabLayout.addTab(resultsTab, 2, false);
+            tabLayout.addView(view.findViewById(R.id.tab_results));
 
             tabLayout.addOnTabSelectedListener( new TabLayout.OnTabSelectedListener() {
                 @Override
@@ -113,24 +140,105 @@ public class Results extends AppCompatActivity {
                         //Display first plane
                         resultsTableLayout = new ResultsTableLayout();
                         resultsTableLayout.x = 0; //Set table at initial data;
-                        resultsTableLayout.season = season;
-                        resultsTableLayout.onViewCreated(view, savedInstanceState);
+                        resultsTableLayout.tableRes.setVisibility(View.VISIBLE);
+                        resultsTableLayout.enable(season, view, savedInstanceState);
 
                         resultsSeekBar = new ResultsSeekBar();
-                        resultsSeekBar.season = season;
-                        resultsSeekBar.onViewCreated(view, savedInstanceState);
+                        resultsSeekBar.seekbar.setVisibility(View.VISIBLE);
+                        resultsSeekBar.enable(season, view, savedInstanceState);
                     }
                     else if (tabLayout.getSelectedTabPosition() == 1) {
                         //Display second plane
                         resultsGraphView = new ResultsGraphView();
-                        resultsGraphView.season = season;
-                        resultsGraphView.onViewCreated(view, savedInstanceState);
+                        resultsGraphView.graphView.setVisibility(View.VISIBLE);
+                        resultsGraphView.enable(season, view, savedInstanceState);
                     }
                     else if (tabLayout.getSelectedTabPosition() == 2) {
                         //Display third plane
                         resultsListViews = new ResultsListViews();
-                        resultsListViews.season = season;
-                        resultsListViews.onViewCreated(view, savedInstanceState);
+                        resultsListViews.linearLayout.setVisibility(View.VISIBLE);
+                        resultsListViews.enable(season, view, savedInstanceState);
+                    }
+                }
+
+                @Override
+                public void onTabUnselected(TabLayout.Tab tab) {
+                    if(tab.getPosition() == 0) {
+                        //Make table invisible
+                        resultsTableLayout.destroy();
+                        resultsSeekBar.destroy();
+                    }
+                    else if (tab.getPosition() == 1) {
+                        //Make graph invisible
+                        resultsGraphView.destroy();
+                    }
+                    else if (tab.getPosition() == 2) {
+                        //Make thrid plane invisible
+                        resultsListViews.destroy();
+                    }
+                }
+
+                @Override
+                public void onTabReselected(TabLayout.Tab tab) {
+                    this.onTabSelected(tab);
+                }
+            } );
+        }
+
+        @Override
+        public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+            resultsCollectionAdapter = new ResultsCollectionAdapter(this);
+            viewPager = view.findViewById(R.id.pager);
+            viewPager.setAdapter( resultsCollectionAdapter);
+
+            TabLayout tabLayout = view.findViewById(R.id.tab_layout);
+
+            TabLayout.Tab tableTab = new TabLayout.Tab();
+            tableTab.setText("TABLE");
+            tabLayout.addTab(tableTab, 0, true); //Default plane
+            tabLayout.addView(view.findViewById(R.id.tab_table));
+
+            TabLayout.Tab graphTab = new TabLayout.Tab();
+            graphTab.setText("GRAPH");
+            tabLayout.addTab(graphTab, 1, false);
+            tabLayout.addView(view.findViewById(R.id.tab_graph));
+
+            TabLayout.Tab resultsTab = new TabLayout.Tab();
+            resultsTab.setText("RESULTS");
+            tabLayout.addTab(resultsTab, 2, false);
+            tabLayout.addView(view.findViewById(R.id.tab_results));
+
+            tabLayout.addOnTabSelectedListener( new TabLayout.OnTabSelectedListener() {
+                @Override
+                public void onTabSelected(TabLayout.Tab tab) {
+                    /* Here there are three tabs determining which items are shown on screen.
+                     * 1. The first and default tab will be displaying the table view.
+                     * 2. The second will be showing the graph data.
+                     * 3. The third will show the results individually in a list view
+                     */
+
+                    if(tabLayout.getSelectedTabPosition() == 0) {
+                        //Display first plane
+                        resultsTableLayout = new ResultsTableLayout();
+                        resultsTableLayout.x = 0; //Set table at initial data;
+                        resultsTableLayout.tableRes.setVisibility(View.VISIBLE);
+                        resultsTableLayout.enable(season, view, savedInstanceState);
+
+                        resultsSeekBar = new ResultsSeekBar();
+                        resultsSeekBar.seekbar.setVisibility(View.VISIBLE);
+                        resultsSeekBar.enable(season, view, savedInstanceState);
+                    }
+                    else if (tabLayout.getSelectedTabPosition() == 1) {
+                        //Display second plane
+                        resultsGraphView = new ResultsGraphView();
+                        resultsGraphView.graphView.setVisibility(View.VISIBLE);
+                        resultsGraphView.enable(season, view, savedInstanceState);
+                    }
+                    else if (tabLayout.getSelectedTabPosition() == 2) {
+                        //Display third plane
+                        resultsListViews = new ResultsListViews();
+                        resultsListViews.linearLayout.setVisibility(View.VISIBLE);
+                        resultsListViews.enable(season, view, savedInstanceState);
                     }
                 }
 
@@ -199,6 +307,7 @@ public class Results extends AppCompatActivity {
         }
     }
 
+
     public class ResultsTableLayout {
 
         public int x;
@@ -207,9 +316,8 @@ public class Results extends AppCompatActivity {
 
         public TableLayout tableRes;
 
-        //@Override
-        public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-            
+        public void enable(Season ssn, @NonNull View view, @Nullable Bundle savedInstanceState) {
+            this.season = ssn;
             tableRes = view.findViewById(R.id.table_res);
 
             if(tableRes.getVisibility() != View.VISIBLE) {
@@ -289,7 +397,9 @@ public class Results extends AppCompatActivity {
 
         public SeekBar seekbar;
 
-        public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        public void enable(Season ssn, @NonNull View view, @Nullable Bundle savedInstanceState) {
+            this.season = ssn;
+
             ResultsTableLayout results_table = new ResultsTableLayout();
 
             results_table.x = 0;
@@ -302,7 +412,7 @@ public class Results extends AppCompatActivity {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                     results_table.x = progress;
-                    results_table.onViewCreated(view, savedInstanceState);
+                    results_table.enable(season, view, savedInstanceState);
                 }
 
                 @Override
@@ -328,7 +438,9 @@ public class Results extends AppCompatActivity {
 
         public GraphView graphView;
 
-        public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState){
+        public void enable(Season ssn, @NonNull View view, @Nullable Bundle savedInstanceState){
+            this.season = ssn;
+
             //Declare the three buttons
             Button button_horizontal = view.findViewById(R.id.axis_data_horizontal);
             Button button_vertical = view.findViewById(R.id.axis_data_vertical);
@@ -438,7 +550,8 @@ public class Results extends AppCompatActivity {
 
         public LinearLayout linearLayout;
 
-        public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState){
+        public void enable(Season ssn, @NonNull View view, @Nullable Bundle savedInstanceState){
+            this.season = ssn;
             linearLayout = view.findViewById(R.id.linear_layout);
 
             TableLayout classification0 = view.findViewById(R.id.C0_list);
@@ -484,7 +597,7 @@ public class Results extends AppCompatActivity {
                 homeTeam.setText(season.matchResults.elementAt(j).home.team_name);
                 matchItem.addView(homeTeam, 0);
 
-                Matrix score = season.matchResults.elementAt(j).result.coefficients.index_times(
+                /*Matrix score = season.matchResults.elementAt(j).result.coefficients.index_times(
                         season.matchResults.elementAt(j).result.xvar);
 
                 TextView homeScore = new TextView(context);
@@ -501,7 +614,7 @@ public class Results extends AppCompatActivity {
 
                 TextView awayTeam = new TextView(context);
                 awayTeam.setText(season.matchResults.elementAt(j).away.team_name);
-                matchItem.addView(awayTeam, 4);
+                matchItem.addView(awayTeam, 4);*/
 
                 matchResults.addView(matchItem);
             }
