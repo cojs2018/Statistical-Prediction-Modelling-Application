@@ -12,10 +12,14 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
+            android:name=".AddLeagueData"
+            android:label="@string/title_activity_add_league_data"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity android:name=".AddNewData" />
+        <activity
             android:name=".Display_Results"
             android:label="@string/title_activity_display__results"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
-        <!-- Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713 -->
+            android:theme="@style/AppTheme.NoActionBar" /> <!-- Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713 -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-3401746284933472~3277349817" />

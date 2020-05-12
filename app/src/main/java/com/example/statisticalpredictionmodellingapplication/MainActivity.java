@@ -1,13 +1,10 @@
 package com.example.statisticalpredictionmodellingapplication;
 
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,22 +20,20 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         final Button start_new = findViewById(R.id.startNew);
-        start_new.setOnClickListener( new View.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.N)
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, Display_Results.class));
-            }
+        start_new.setOnClickListener( v -> {
+            startActivity( new Intent( MainActivity.this, Display_Results.class ) );
+        } );
+
+        final Button createORupdate = findViewById(R.id.createAndupdte);
+        createORupdate.setOnClickListener( v -> {
+            startActivity( new Intent( MainActivity.this, AddLeagueData.class ) );
         } );
 
         final Button read_me = findViewById(R.id.readme);
-        read_me.setOnClickListener( new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //Display read_me.txt on screen
-                ReadMeActivity readme = new ReadMeActivity();
-                startActivity(new Intent(MainActivity.this, ReadMeActivity.class));
-            }
+        read_me.setOnClickListener( v -> {
+            //Display read_me.txt on screen
+            ReadMeActivity readme = new ReadMeActivity();
+            startActivity(new Intent(MainActivity.this, ReadMeActivity.class));
         } );
     }
 }

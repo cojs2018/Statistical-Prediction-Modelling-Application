@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/lladdTeam"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    tools:ignore="MissingDefaultResource">
+
+    <EditText
+        android:id="@+id/txt_teamname"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Team name" />
+
+    <EditText
+        android:id="@+id/txt_matches_played"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Matches Played"
+        android:inputType="number" />
+
+    <EditText
+        android:id="@+id/txt_wins"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Wins"
+        android:inputType="number" />
+
+    <EditText
+        android:id="@+id/txt_draws"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Draws"
+        android:inputType="number" />
+
+    <EditText
+        android:id="@+id/txt_loses"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Loses"
+        android:inputType="number" />
+
+    <EditText
+        android:id="@+id/txt_pointstotal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="totalpoints"
+        android:inputType="number" />
+
+    <EditText
+        android:id="@+id/txt_goalsfor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="goals for"
+        android:inputType="number" />
+
+    <EditText
+        android:id="@+id/txt_goalsag"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="goalsagainst"
+        android:inputType="number" />
+
+    <EditText
+        android:id="@+id/txt_points5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Points from 5"
+        android:inputType="number" />
+
+    <CheckBox
+        android:id="@+id/checkbox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="League matches played" />
+
+</LinearLayout>

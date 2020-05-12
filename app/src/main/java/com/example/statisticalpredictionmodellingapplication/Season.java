@@ -1,8 +1,8 @@
 package com.example.statisticalpredictionmodellingapplication;
 
-import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
-import android.view.View;
 
 import androidx.annotation.RequiresApi;
 
@@ -10,16 +10,11 @@ import com.example.statisticalpredictionmodellingapplication.Kotlin.Feasible;
 import com.example.statisticalpredictionmodellingapplication.Kotlin.Matrix;
 import com.softmoore.android.graphlib.Point;
 
-import java.io.File;
 import java.util.Comparator;
 import java.util.Vector;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
-
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.converters.ConverterUtils;
 
 public class Season {
 
@@ -30,106 +25,136 @@ public class Season {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void getArff(String training_set_dir, String test_set_dir) {
+    public void getData(String time_stamp) throws Exception {
 
         //Gets data from .arff files
-        File file;
 
         League newLeague = new League();
 
         Matrix matrix = new Matrix();
 
-        try {
-            //Get data from training set
-            ConverterUtils.DataSource tsource = new ConverterUtils.DataSource(training_set_dir);
-            Instances tdata = tsource.getDataSet();
+        SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase("LeagueData.db", null, SQLiteDatabase.OPEN_READONLY);
 
-            int pointer = 0;
-            while(pointer < tdata.size()) {
+        //Get league data
+        Cursor leagueCursor = sqLiteDatabase.rawQuery("SELECT * FROM LEAGUE_" + time_stamp + ";",null);
+        if(leagueCursor.moveToFirst()) {
+            while(leagueCursor.moveToNext()) {
                 Team team = new Team();
-                Instance instance = tdata.get(pointer);
 
-                if(instance.attribute(0).isString()) {
-                    team.team_name = instance.toString(0);
-                }
+                team.team_name = leagueCursor.getString(0);
+                team.matches_played = leagueCursor.getInt(1);
+                team.total_wins = leagueCursor.getInt(2);
+                team.total_draws = leagueCursor.getInt(3);
+                team.total_loses = leagueCursor.getInt(4);
+                team.total_points = leagueCursor.getInt(5);
+                team.goals_for = leagueCursor.getInt(6);
+                team.goals_against = leagueCursor.getInt(7);
+                team.goals_difference = leagueCursor.getInt(8);
+                team.points_from_5 = leagueCursor.getInt(9);
 
-                team.matches_played = (int) instance.value(1);
-                team.total_wins = (int) instance.value(2);
-                team.total_draws = (int) instance.value(3);
-                team.total_loses = (int) instance.value(4);
-                team.total_points = (int) instance.value(5);
-                team.goals_for = (int) instance.value(6);
-                team.goals_against = (int) instance.value(7);
-                team.goals_difference = (int) instance.value(8);
-                team.points_from_5 = (int) instance.value(9);
-
-                pointer++;
+                newLeague.league_at_week.add(team);
             }
 
-            //Get data from test set
-            ConverterUtils.DataSource msource = new ConverterUtils.DataSource(test_set_dir);
-            Instances mdata = msource.getDataSet();
+            //Get match data
+            Cursor matchCursor = sqLiteDatabase.rawQuery("SELECT * FROM SCHEDULE_" + time_stamp + ";",null);
+            if(matchCursor.moveToFirst()) {
+                while(matchCursor.moveToNext()) {
+                    if(matchCursor.getInt(4) == 0) { //Match not completed
+                        String home_team = matchCursor.getString(0);
+                        String away_team = matchCursor.getString(1);
+                        long date = matchCursor.getLong(3);
 
-            pointer = 0;
-            while(pointer < mdata.size()) {
-                Instance instance = mdata.get(pointer);
-
-                String home_team = instance.stringValue(0);
-                Function<Team, Boolean> getTeam = (t) -> (t.team_name == home_team);
-                int h = newLeague.league_at_week.indexOf(getTeam);
-                Team hTeam = newLeague.league_at_week.elementAt(h);
-
-                int k = 1;
-                while(k < instance.numAttributes()) {
-                    if(!instance.isMissing(k)) {
-                        String away_team = instance.stringValue(k);
-                        getTeam = (t) -> (t.team_name == away_team);
-                        int a = newLeague.league_at_week.indexOf(getTeam);
-                        Team aTeam = newLeague.league_at_week.elementAt(a);
-
-                        Match match = new Match();
-
-                        match.home = hTeam;
-                        match.away = aTeam;
-                        match.week = k;
-
-                        Vector<Integer> v = new Vector<>();
-                        v.add(hTeam.total_wins);
-                        v.add(hTeam.total_draws);
-                        v.add(hTeam.total_loses);
-                        v.add(hTeam.goals_difference);
-                        v.add(hTeam.points_from_5);
-                        v.add(aTeam.total_wins);
-                        v.add(aTeam.total_draws);
-                        v.add(aTeam.total_loses);
-                        v.add(aTeam.goals_difference);
-                        v.add(aTeam.points_from_5);
-
-                        match.Tableau = matrix.setMatrix(v, 5);
-
-                        v.clear();
-                        v.add(hTeam.total_points);
-                        v.add(aTeam.total_points);
-
-                        match.vector_tpbm_ = matrix.setMatrix(v, 1);
-
-                        this.matchResults.add(match);
+                        Match match = new Match(home_team, away_team, date);
                     }
-                    k++;
                 }
-                pointer++;
+            }
+            else {
+                throw new IllegalStateException("No existing data available!");
+            }
+        }
+        else {
+            throw new IllegalStateException("No existing data available!");
+        }
+
+        /*int pointer = 0;
+        while(pointer < tdata.size()) {
+            Team team = new Team();
+            Instance instance = tdata.get(pointer);
+
+            if(instance.attribute(0).isString()) {
+                team.team_name = instance.toString(0);
             }
 
-            //Sort match list based on week in ascending order
-            BiFunction<Match, Match, Boolean> sort_season_by_week = (Match m0, Match m1) -> (m0.week < m1.week);
-            this.matchResults.sort( (Comparator<? super Match>) sort_season_by_week );
+            team.matches_played = (int) instance.value(1);
+            team.total_wins = (int) instance.value(2);
+            team.total_draws = (int) instance.value(3);
+            team.total_loses = (int) instance.value(4);
+            team.total_points = (int) instance.value(5);
+            team.goals_for = (int) instance.value(6);
+            team.goals_against = (int) instance.value(7);
+            team.goals_difference = (int) instance.value(8);
+            team.points_from_5 = (int) instance.value(9);
 
-            this.completeLeague();
+            pointer++;
         }
-        catch (Exception exe) {
-            View view = null;
-            Context context = view.getContext();
-        }
+
+        //Get data from test set
+        csvLoader.setSource(new File(test_set_dir));
+        Instances mdata = csvLoader.getDataSet();
+
+        pointer = 0;
+        while(pointer < mdata.size()) {
+            Instance instance = mdata.get(pointer);
+
+            String home_team = instance.stringValue(0);
+            Function<Team, Boolean> getTeam = (t) -> (t.team_name == home_team);
+            Team hTeam = extract(newLeague.league_at_week, getTeam);
+
+            int k = 1;
+            while(k < instance.numAttributes()) {
+                if(!instance.isMissing(k)) {
+                    String away_team = instance.stringValue(k);
+                    getTeam = (t) -> (t.team_name == away_team);
+                    Team aTeam = extract(newLeague.league_at_week, getTeam);
+
+                    Match match = new Match();
+
+                    match.home = hTeam;
+                    match.away = aTeam;
+                    match.week = k;
+
+                    Vector<Integer> v = new Vector<>();
+                    v.add(hTeam.total_wins);
+                    v.add(hTeam.total_draws);
+                    v.add(hTeam.total_loses);
+                    v.add(hTeam.goals_difference);
+                    v.add(hTeam.points_from_5);
+                    v.add(aTeam.total_wins);
+                    v.add(aTeam.total_draws);
+                    v.add(aTeam.total_loses);
+                    v.add(aTeam.goals_difference);
+                    v.add(aTeam.points_from_5);
+
+                    match.Tableau = matrix.setMatrix(v, 5);
+
+                    v.clear();
+                    v.add(hTeam.total_points);
+                    v.add(aTeam.total_points);
+
+                    match.vector_tpbm_ = matrix.setMatrix(v, 1);
+
+                    this.matchResults.add(match);
+                }
+                k++;
+            }
+            pointer++;
+        }*/
+
+        //Sort match list based on week in ascending order
+        BiFunction<Match, Match, Boolean> sort_season_by_week = (Match m0, Match m1) -> (m0.week < m1.week);
+        this.matchResults.sort( (Comparator<? super Match>) sort_season_by_week );
+
+        this.completeLeague();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -163,8 +188,8 @@ public class Season {
 
         matchResults = new Vector<>();
 
-        matchResults.add(new Match("Mct", "Ars", 1));
-        matchResults.add(new Match("Avl", "Shf", 1));
+       // matchResults.add(new Match("Mct", "Ars", 1));
+       // matchResults.add(new Match("Avl", "Shf", 1));
 
         completeLeague();
     }
@@ -263,7 +288,7 @@ public class Season {
                 this.resultsLeague.add(newTable);
             }
             else {
-                if(match.week < this.matchResults.elementAt(i + 1).week) {
+                if(match.week + 7 <= this.matchResults.elementAt(i + 1).week) { //Update table every 7 days
                     this.resultsLeague.add(newTable);
                 }
             }
@@ -387,14 +412,14 @@ public class Season {
 
         public Feasible result;
 
-        public int week;
+        public long week;
 
         public Match() {
 
         }
 
         @RequiresApi(api = Build.VERSION_CODES.N)
-        public Match(String home_team, String away_team, int k) {
+        public Match(String home_team, String away_team, long k) {
             Function<Team, Boolean> getTeam = (t) -> (t.team_name == home_team);
             Team hTeam = extract(resultsLeague.firstElement().league_at_week, getTeam);
 

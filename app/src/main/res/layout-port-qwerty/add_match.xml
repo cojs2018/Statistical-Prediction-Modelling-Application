@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    tools:ignore="MissingDefaultResource">
+
+    <Spinner
+        android:id="@+id/home_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:spinnerMode="dialog" />
+
+    <Spinner
+        android:id="@+id/away_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:spinnerMode="dialog" />
+
+    <EditText
+        android:id="@+id/enterDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="enter date"
+        android:inputType="date" />
+
+    <CheckBox
+        android:id="@+id/completed"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Match completed?" />
+
+    <EditText
+        android:id="@+id/home_score"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="home score"
+        android:inputType="number" />
+
+    <EditText
+        android:id="@+id/away_score"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="away score"
+        android:inputType="number" />
+</LinearLayout>

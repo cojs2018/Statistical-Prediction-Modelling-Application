@@ -1,8 +1,10 @@
 package com.example.statisticalpredictionmodellingapplication;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -33,6 +35,11 @@ import static android.view.View.VISIBLE;
 
 public class Display_Results extends AppCompatActivity {
 
+    public static final int PICKFILE_RESULT_CODE = 8778;
+
+    public String training_set = null;
+    public String test_set = null;
+
     public TableLayout table;
     public SeekBar seekbar;
     public GraphView graphView;
@@ -43,28 +50,46 @@ public class Display_Results extends AppCompatActivity {
     public TableLayout list_table;
     public Season season;
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_display__results );
 
         try {
-            //ACTION_GET_CONTENT is the intent to choose a file via the system browser.
-            Intent intent0 = new Intent( Intent.ACTION_GET_CONTENT );
-            //Filter to only show results that can be opened
-            intent0.addCategory( Intent.CATEGORY_OPENABLE );
-            //Only show files of type .arff
-            intent0.setType( "*/*" );
-            //startActivityForResult( intent0, PICKFILE_RESULT_CODE );
+            /*Get list of data_tables from database
+             * 1. Query database for a list of data tables. */
+            SQLiteDatabase sqLiteDatabase = this.openOrCreateDatabase("LeagueData.db", MODE_PRIVATE, null);
+            Cursor tablesCursor = sqLiteDatabase.rawQuery("SELECT * FROM sqlite_master " +
+                    "Where type='table' AND intr(name, 'LEAGUE') > 0" +
+                    "ORDER BY name;", null);
 
-            Intent intent1 = new Intent( Intent.ACTION_GET_CONTENT );
-            intent1.addCategory( Intent.CATEGORY_OPENABLE );
-            intent1.setType( "*/*" );
-            //startActivityForResult( intent1, PICKFILE_RESULT_CODE );
+            //2. Call new alert dialog
+            androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
+            builder.setTitle("Update data set");
 
-            this.season = new Season();
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                this.season.getLeague();
+            //3. If cursor has return a list of items, show these as items on screen, else say there are no items available
+            if(tablesCursor.moveToFirst()) {
+                Vector<String> tableList = new Vector<>();
+                while(tablesCursor.moveToNext()) {
+                    tableList.add(tablesCursor.getString(1).substring(7));
+                }
+
+                builder.setItems( tableList.toArray( new CharSequence[tableList.size()]), (dialog, which) -> {
+                    this.season = new Season();
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        try {
+                            season.getData(tableList.elementAt(which));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            }
+            else {
+                CharSequence cs[] = new CharSequence[1];
+                cs[1] = "These are no table in database";
+                builder.setItems(cs, ((dialog, which) -> {/* DO NOTHING */}));
             }
 
             SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter( this, getSupportFragmentManager() );
@@ -165,6 +190,7 @@ public class Display_Results extends AppCompatActivity {
             androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
             builder.setTitle("ERROR: Exception!");
             builder.setMessage(exe.getMessage());
+            builder.show();
         }
     }
 

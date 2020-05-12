@@ -19,4 +19,6 @@
     </string-array>
     <string name="title_activity_main2">Main2Activity</string>
     <string name="title_activity_display__results">Display_Results</string>
+    <string name="title_activity_add_new_data">AddNewData</string>
+    <string name="title_activity_add_league_data">AddLeagueData</string>
 </resources>
