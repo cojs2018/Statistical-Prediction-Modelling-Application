@@ -15,7 +15,6 @@
             android:name=".AddLeagueData"
             android:label="@string/title_activity_add_league_data"
             android:theme="@style/AppTheme.NoActionBar"></activity>
-        <activity android:name=".AddNewData" />
         <activity
             android:name=".Display_Results"
             android:label="@string/title_activity_display__results"
@@ -28,7 +27,6 @@
             android:resource="@array/preloaded_fonts" />
 
         <activity android:name=".ReadMeActivity" />
-        <activity android:name=".Loading" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
