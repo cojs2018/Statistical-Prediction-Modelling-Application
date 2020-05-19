@@ -25,7 +25,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_begin="20dp" />
+        app:layout_constraintGuide_begin="82dp" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline9"
@@ -34,34 +34,48 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_begin="655dp" />
 
-    <com.google.android.gms.ads.AdView
-        android:id="@+id/adView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        tools:layout_editor_absoluteX="45dp"
-        tools:layout_editor_absoluteY="548dp" />
-
     <ProgressBar
         android:id="@+id/progressBar"
         style="?android:attr/progressBarStyle"
         android:layout_width="128dp"
         android:layout_height="136dp"
-        tools:layout_editor_absoluteX="141dp"
-        tools:layout_editor_absoluteY="132dp" />
+        android:layout_marginTop="50dp"
+        app:layout_constraintEnd_toStartOf="@+id/guideline6"
+        app:layout_constraintStart_toStartOf="@+id/guideline5"
+        app:layout_constraintTop_toTopOf="@+id/guideline8" />
 
     <TextView
         android:id="@+id/loadTxt"
-        android:layout_width="94dp"
-        android:layout_height="34dp"
+        android:layout_width="135dp"
+        android:layout_height="37dp"
+        android:layout_marginTop="76dp"
         android:text="Loading..."
-        tools:layout_editor_absoluteX="155dp"
-        tools:layout_editor_absoluteY="321dp" />
+        android:textColor="#000000"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.482"
+        app:layout_constraintStart_toStartOf="@+id/guideline5"
+        app:layout_constraintTop_toBottomOf="@+id/progressBar" />
 
     <Button
         android:id="@+id/Cancel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="124dp"
+        android:layout_height="78dp"
         android:text="Cancel"
-        tools:layout_editor_absoluteX="161dp"
-        tools:layout_editor_absoluteY="425dp" />
+        app:layout_constraintBottom_toTopOf="@+id/guideline9"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/loadTxt"
+        app:layout_constraintVertical_bias="0.295" />
+
+    <!--TextureView
+        android:id="@+id/textureView"
+        android:layout_width="0dp"
+        android:layout_height="72dp"
+        android:background="#633974"
+        android:foreground="#633974"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" -->
 </androidx.constraintlayout.widget.ConstraintLayout>

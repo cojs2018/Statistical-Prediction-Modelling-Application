@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.statisticalpredictionmodellingapplication">
 
     <application
@@ -8,8 +9,25 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
-        <activity android:name=".Results"></activity>
+        android:theme="@style/AppTheme"
+        tools:ignore="GoogleAppIndexingWarning">
+        <activity
+            android:name=".AddLeagueData"
+            android:label="@string/title_activity_add_league_data"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity android:name=".AddNewData" />
+        <activity
+            android:name=".Display_Results"
+            android:label="@string/title_activity_display__results"
+            android:theme="@style/AppTheme.NoActionBar" /> <!-- Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713 -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3401746284933472~3277349817" />
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
+
+        <activity android:name=".ReadMeActivity" />
         <activity android:name=".Loading" />
         <activity android:name=".MainActivity">
             <intent-filter>
