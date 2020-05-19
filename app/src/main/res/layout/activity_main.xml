@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
-    android:background="#633974">
+    android:background="#009688"
+    tools:context=".MainActivity">
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline"
@@ -43,10 +43,12 @@
         android:layout_marginTop="30dp"
         android:layout_marginEnd="20dp"
         android:layout_marginBottom="24dp"
+        android:fontFamily="@font/offside"
         android:gravity="center_horizontal"
-        android:text="TextView"
+        android:text="LEAGUE PREDICTOR"
         android:textColor="#FFFFFF"
-        android:textSize="36sp"
+        android:textSize="30sp"
+        android:textStyle="bold|italic"
         app:layout_constraintBottom_toTopOf="@+id/startNew"
         app:layout_constraintEnd_toStartOf="@+id/guideline2"
         app:layout_constraintStart_toStartOf="@+id/guideline"

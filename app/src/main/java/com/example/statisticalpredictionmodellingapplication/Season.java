@@ -36,7 +36,7 @@ public class Season {
         SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase("LeagueData.db", null, SQLiteDatabase.OPEN_READONLY);
 
         //Get league data
-        Cursor leagueCursor = sqLiteDatabase.rawQuery("SELECT * FROM LEAGUE_" + time_stamp + ";",null);
+        Cursor leagueCursor = sqLiteDatabase.rawQuery("SELECT t.* FROM LEAGUE_" + time_stamp + " t LIMIT 501;",null);
         if(leagueCursor.moveToFirst()) {
             while(leagueCursor.moveToNext()) {
                 Team team = new Team();
@@ -56,7 +56,7 @@ public class Season {
             }
 
             //Get match data
-            Cursor matchCursor = sqLiteDatabase.rawQuery("SELECT * FROM SCHEDULE_" + time_stamp + ";",null);
+            Cursor matchCursor = sqLiteDatabase.rawQuery("SELECT t.* FROM SCHEDULE_" + time_stamp + " t LIMIT 501;",null);
             if(matchCursor.moveToFirst()) {
                 while(matchCursor.moveToNext()) {
                     if(matchCursor.getInt(4) == 0) { //Match not completed
@@ -75,80 +75,6 @@ public class Season {
         else {
             throw new IllegalStateException("No existing data available!");
         }
-
-        /*int pointer = 0;
-        while(pointer < tdata.size()) {
-            Team team = new Team();
-            Instance instance = tdata.get(pointer);
-
-            if(instance.attribute(0).isString()) {
-                team.team_name = instance.toString(0);
-            }
-
-            team.matches_played = (int) instance.value(1);
-            team.total_wins = (int) instance.value(2);
-            team.total_draws = (int) instance.value(3);
-            team.total_loses = (int) instance.value(4);
-            team.total_points = (int) instance.value(5);
-            team.goals_for = (int) instance.value(6);
-            team.goals_against = (int) instance.value(7);
-            team.goals_difference = (int) instance.value(8);
-            team.points_from_5 = (int) instance.value(9);
-
-            pointer++;
-        }
-
-        //Get data from test set
-        csvLoader.setSource(new File(test_set_dir));
-        Instances mdata = csvLoader.getDataSet();
-
-        pointer = 0;
-        while(pointer < mdata.size()) {
-            Instance instance = mdata.get(pointer);
-
-            String home_team = instance.stringValue(0);
-            Function<Team, Boolean> getTeam = (t) -> (t.team_name == home_team);
-            Team hTeam = extract(newLeague.league_at_week, getTeam);
-
-            int k = 1;
-            while(k < instance.numAttributes()) {
-                if(!instance.isMissing(k)) {
-                    String away_team = instance.stringValue(k);
-                    getTeam = (t) -> (t.team_name == away_team);
-                    Team aTeam = extract(newLeague.league_at_week, getTeam);
-
-                    Match match = new Match();
-
-                    match.home = hTeam;
-                    match.away = aTeam;
-                    match.week = k;
-
-                    Vector<Integer> v = new Vector<>();
-                    v.add(hTeam.total_wins);
-                    v.add(hTeam.total_draws);
-                    v.add(hTeam.total_loses);
-                    v.add(hTeam.goals_difference);
-                    v.add(hTeam.points_from_5);
-                    v.add(aTeam.total_wins);
-                    v.add(aTeam.total_draws);
-                    v.add(aTeam.total_loses);
-                    v.add(aTeam.goals_difference);
-                    v.add(aTeam.points_from_5);
-
-                    match.Tableau = matrix.setMatrix(v, 5);
-
-                    v.clear();
-                    v.add(hTeam.total_points);
-                    v.add(aTeam.total_points);
-
-                    match.vector_tpbm_ = matrix.setMatrix(v, 1);
-
-                    this.matchResults.add(match);
-                }
-                k++;
-            }
-            pointer++;
-        }*/
 
         //Sort match list based on week in ascending order
         BiFunction<Match, Match, Boolean> sort_season_by_week = (Match m0, Match m1) -> (m0.week < m1.week);

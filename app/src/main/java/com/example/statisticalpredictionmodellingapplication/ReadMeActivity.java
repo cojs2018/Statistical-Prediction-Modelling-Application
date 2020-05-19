@@ -2,6 +2,7 @@ package com.example.statisticalpredictionmodellingapplication;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Scroller;
@@ -16,6 +17,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 public class ReadMeActivity extends AppCompatActivity {
 
@@ -37,15 +40,15 @@ public class ReadMeActivity extends AppCompatActivity {
         TextView textView = view.findViewById(R.id.textView2);
 
         try {
-            File file = new File("README.md");
-            FileReader fileReader = new FileReader(file);
+            AssetManager am = this.getAssets();
 
-            String str = new String();
+            InputStream ins = am.open("README.md");
+            InputStreamReader inputStreamReader = new InputStreamReader(ins);
 
-            while(fileReader.read() != -1) {
-                char c[] = new char[200];
-                fileReader.read(c);
-                str.concat(c.toString());
+            String str = "";
+            while(inputStreamReader.read() != -1) {
+                char c = (char) inputStreamReader.read();
+                str.concat( String.valueOf( c ) );
             }
 
             textView.setText(str);

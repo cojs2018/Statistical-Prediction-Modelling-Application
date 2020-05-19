@@ -49,9 +49,7 @@ public class AddLeagueData extends AppCompatActivity {
         /*Start dialog to choose either to update existing table pair or create new pair of date tables.
          * 1. Query database for a list of data tables. */
         SQLiteDatabase sqLiteDatabase = this.openOrCreateDatabase("LeagueData.db", MODE_PRIVATE, null);
-        Cursor tablesCursor = sqLiteDatabase.rawQuery("SELECT * FROM sqlite_master " +
-                "Where type='table' AND instr(name, 'LEAGUE') > 0 " +
-                "ORDER BY name;", null);
+        Cursor tablesCursor = sqLiteDatabase.rawQuery("SELECT t.*, ROWID FROM sqlite_master t LIMIT 501;", null);
 
         //2. Call new alert dialog
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -61,7 +59,9 @@ public class AddLeagueData extends AppCompatActivity {
         if(tablesCursor.moveToFirst()) {
             Vector<String> tableList = new Vector<>();
             while(tablesCursor.moveToNext()) {
-                tableList.add(tablesCursor.getString(1).substring(7));
+                String tablename = tablesCursor.getString(1);
+                if(tablename.contains("LEAGUE"))
+                    tableList.add(tablename.substring(7));
             }
 
             builder.setItems( tableList.toArray( new CharSequence[tableList.size()]), (dialog, which) -> updateTable(tableList.elementAt(which)) );
@@ -181,7 +181,7 @@ public class AddLeagueData extends AppCompatActivity {
         SQLiteDatabase sqLiteDatabase = this.openOrCreateDatabase("LeagueData.db", MODE_PRIVATE, null);
 
         //First update data table
-        Cursor leagueCursor = sqLiteDatabase.rawQuery("SELECT * FROM LEAGUE_" + selected + ";", null);
+        Cursor leagueCursor = sqLiteDatabase.rawQuery("SELECT t.* FROM LEAGUE_" + selected + " t LIMIT 501;", null);
 
         if(leagueCursor.moveToFirst()) {
             while(leagueCursor.moveToNext()) {
@@ -197,7 +197,7 @@ public class AddLeagueData extends AppCompatActivity {
             }
 
             //Next update schedule
-            Cursor matchCursor = sqLiteDatabase.rawQuery("SELECT * FROM SCHEDULE_" + selected + ";", null);
+            Cursor matchCursor = sqLiteDatabase.rawQuery("SELECT t.* FROM SCHEDULE_" + selected + " t LIMIT 501;", null);
 
             if(matchCursor.moveToFirst()) {
                 while(matchCursor.moveToNext()) {
@@ -576,6 +576,9 @@ public class AddLeagueData extends AppCompatActivity {
         for(int i = 1; i < this.data_table.getChildCount(); i++) {
             TableRow tableRow = (TableRow) this.data_table.getChildAt(i);
 
+            int goalDiff = Integer.parseInt(String.valueOf(((TextView)tableRow.getChildAt(7)).getText()))
+                    - Integer.parseInt(String.valueOf(((TextView)tableRow.getChildAt(8)).getText()));
+
             sqLiteDatabase.execSQL("INSERT INTO " + "League_" + time_stamp + "(teamName, matchesPlayed" +
                     "wins, draws, loses, totalPoints, goalsFor, goalsAgainst, goalsDiff, pointsFive, class) VALUES ("
                     + ((TextView)tableRow.getChildAt(0)).getText() + ", "
@@ -587,6 +590,7 @@ public class AddLeagueData extends AppCompatActivity {
                     + ((TextView)tableRow.getChildAt(6)).getText() + ", "
                     + ((TextView)tableRow.getChildAt(7)).getText() + ", "
                     + ((TextView)tableRow.getChildAt(8)).getText() + ", "
+                    + goalDiff + ", "
                     + ((TextView)tableRow.getChildAt(9)).getText() + ", "
                     + "S);");
         }

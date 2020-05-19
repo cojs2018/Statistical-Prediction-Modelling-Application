@@ -617,8 +617,7 @@ public class Results extends AppCompatActivity {
                 matchItem.addView(awayTeam, 4);*/
 
                 matchResults.addView(matchItem);
-            }
-        }
+            }        }
 
         public void destroy() {
             linearLayout.setVisibility(View.GONE);

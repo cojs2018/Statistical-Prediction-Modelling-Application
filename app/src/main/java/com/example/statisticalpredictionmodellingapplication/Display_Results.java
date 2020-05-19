@@ -1,10 +1,8 @@
 package com.example.statisticalpredictionmodellingapplication;
 
 import android.app.AlertDialog;
-import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -60,9 +58,7 @@ public class Display_Results extends AppCompatActivity {
             /*Get list of data_tables from database
              * 1. Query database for a list of data tables. */
             SQLiteDatabase sqLiteDatabase = this.openOrCreateDatabase("LeagueData.db", MODE_PRIVATE, null);
-            Cursor tablesCursor = sqLiteDatabase.rawQuery("SELECT * FROM sqlite_master " +
-                    "Where type='table' AND intr(name, 'LEAGUE') > 0" +
-                    "ORDER BY name;", null);
+            Cursor tablesCursor = sqLiteDatabase.rawQuery("SELECT t.*, ROWID FROM sqlite_master t LIMIT 501;", null);
 
             //2. Call new alert dialog
             androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
@@ -72,7 +68,9 @@ public class Display_Results extends AppCompatActivity {
             if(tablesCursor.moveToFirst()) {
                 Vector<String> tableList = new Vector<>();
                 while(tablesCursor.moveToNext()) {
-                    tableList.add(tablesCursor.getString(1).substring(7));
+                    String tablename = tablesCursor.getString(1);
+                    if(tablename.contains("LEAGUE"))
+                        tableList.add(tablename.substring(7));
                 }
 
                 builder.setItems( tableList.toArray( new CharSequence[tableList.size()]), (dialog, which) -> {
