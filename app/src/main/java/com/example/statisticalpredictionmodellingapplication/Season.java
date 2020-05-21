@@ -1,5 +1,6 @@
 package com.example.statisticalpredictionmodellingapplication;
 
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
@@ -18,10 +19,14 @@ import java.util.function.Predicate;
 
 public class Season {
 
+    public Context context;
+    public String dbFile = "/data/user/0/com.example.statisicalpredictionmodellingapplication/databases/LeagueData.db";
+
     //Default constructor
-    public Season() {
+    public Season(Context con) {
         //Call an empty season
         resultsLeague = new Vector<>();
+        this.context = con;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -33,7 +38,10 @@ public class Season {
 
         Matrix matrix = new Matrix();
 
-        SQLiteDatabase sqLiteDatabase = SQLiteDatabase.openDatabase("LeagueData.db", null, SQLiteDatabase.OPEN_READONLY);
+        SQLiteDatabase sqLiteDatabase = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O_MR1) {
+            sqLiteDatabase = SQLiteDatabase.openDatabase("LeagueData.db", null, SQLiteDatabase.OPEN_READONLY);
+        }
 
         //Get league data
         Cursor leagueCursor = sqLiteDatabase.rawQuery("SELECT t.* FROM LEAGUE_" + time_stamp + " t LIMIT 501;",null);

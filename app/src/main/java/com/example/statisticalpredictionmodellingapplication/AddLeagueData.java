@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +17,7 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
@@ -28,18 +30,22 @@ import java.util.Date;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
+import kotlin.jvm.functions.Function2;
 import kotlin.jvm.functions.Function3;
 
+import static android.graphics.Color.argb;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
 public class AddLeagueData extends AppCompatActivity {
+    public String dbPath = "";
 
     TableLayout data_table;
     TableLayout schedule;
 
     String time_stamp;
 
+    @RequiresApi(api = Build.VERSION_CODES.O_MR1)
     @SuppressLint("WrongViewCast")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,137 +54,149 @@ public class AddLeagueData extends AppCompatActivity {
 
         /*Start dialog to choose either to update existing table pair or create new pair of date tables.
          * 1. Query database for a list of data tables. */
-        SQLiteDatabase sqLiteDatabase = this.openOrCreateDatabase("LeagueData.db", MODE_PRIVATE, null);
-        Cursor tablesCursor = sqLiteDatabase.rawQuery("SELECT t.*, ROWID FROM sqlite_master t LIMIT 501;", null);
 
-        //2. Call new alert dialog
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Update data set");
+        try {
 
-        //3. If cursor has return a list of items, show these as items on screen, else say there are no items available
-        if(tablesCursor.moveToFirst()) {
-            Vector<String> tableList = new Vector<>();
-            while(tablesCursor.moveToNext()) {
-                String tablename = tablesCursor.getString(1);
-                if(tablename.contains("LEAGUE"))
-                    tableList.add(tablename.substring(7));
+            SQLiteDatabase sqLiteDatabase = null;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O_MR1) {
+                sqLiteDatabase = openOrCreateDatabase("LeagueData.db", MODE_ENABLE_WRITE_AHEAD_LOGGING, null);
+                dbPath = sqLiteDatabase.getPath();
             }
+            Cursor tablesCursor = sqLiteDatabase.rawQuery( "SELECT * FROM sqlite_master LIMIT 501;", null );
 
-            builder.setItems( tableList.toArray( new CharSequence[tableList.size()]), (dialog, which) -> updateTable(tableList.elementAt(which)) );
-        }
-        else {
-            CharSequence cs[] = new CharSequence[1];
-            cs[0] = "These are no table in database";
-            builder.setItems(cs, ((dialog, which) -> {/* DO NOTHING */}));
-        }
+            //2. Call new alert dialog
+            AlertDialog.Builder builder = new AlertDialog.Builder( this );
+            builder.setTitle( "Update data set" );
 
-        builder.setNeutralButton( "CREATE NEW", (dialog, which) -> dialog.dismiss() ); //Carry on with empty table
-        builder.setNegativeButton( "CANCEL", (dialog, which) -> {
-            dialog.cancel();
-            startActivity(new Intent(AddLeagueData.this, MainActivity.class));
-        } );
-
-        //Run builder
-        builder.show();
-
-        SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter( this, getSupportFragmentManager() );
-        ViewPager viewPager = findViewById( R.id.view_pager );
-        viewPager.setAdapter( sectionsPagerAdapter );
-        TabLayout tabs = findViewById( R.id.tabs );
-        tabs.setupWithViewPager( viewPager );
-        FloatingActionButton add_button = findViewById(R.id.fAAdd);
-        FloatingActionButton delete_button = findViewById(R.id.fADelete);
-        FloatingActionButton save_button = findViewById(R.id.fASave);
-
-        //Get tables and clear any existing data from them
-        this.data_table = findViewById(R.id.tableLayout);
-        for(int i = 1; i < this.data_table.getChildCount(); i++)
-            this.deleteRow(i);
-
-        this.schedule = findViewById(R.id.schedule);
-        for (int i = 1; i < this.schedule.getChildCount(); i++)
-            this.deleteMatch(i);
-        this.schedule.setVisibility(GONE);
-
-        tabs.getTabAt(0).setText("TEAMS");
-        tabs.getTabAt(1).setText("SCHEDULE");
-
-        tabs.addOnTabSelectedListener( new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                switch(tab.getPosition()) {
-                    case 0:
-                        data_table.setVisibility(VISIBLE);
-                        break;
-                    case 1:
-                        schedule.setVisibility(VISIBLE);
-                        break;
+            //3. If cursor has return a list of items, show these as items on screen, else say there are no items available
+            if (tablesCursor.moveToFirst() && tablesCursor.getCount() > 0) {
+                Vector<String> tableList = new Vector<>();
+                while (tablesCursor.moveToNext()) {
+                    String tablename = tablesCursor.getString( 1 );
+                    if (tablename.contains( "League" ))
+                        tableList.add( tablename.substring( 7 ) );
                 }
-            }
 
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-                switch(tab.getPosition()) {
-                    case 0:
-                        data_table.setVisibility(GONE);
-                        break;
-                    case 1:
-                        schedule.setVisibility(GONE);
-                        break;
-                }
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) { }
-        } );
-
-        add_button.setOnClickListener( v -> {
-            if(this.data_table.getVisibility() == VISIBLE) {
-                addRow();
-            }
-            else {
-                addMatch();
-            }
-        } );
-
-        delete_button.setOnClickListener( v -> {
-            if(this.data_table.getVisibility() == VISIBLE) {
-                if(data_table.getChildCount() > 1) {
-                    for(int i = 1; i < data_table.getChildCount(); i++){
-                        if(data_table.getChildAt(i).isSelected()) {
-                            deleteRow( i );
-                        }
-                    }
-                }
-                else {
-                    throw new IllegalStateException("Empty table");
-                }
-            }
-            else {
-                if(schedule.getChildCount() > 1) {
-                    for(int i = 1; i < schedule.getChildCount(); i++) {
-                        if(schedule.getChildAt(i).isSelected()) {
-                            deleteMatch( i );
-                        }
-                    }
-                }
-                else {
-                    throw new IllegalStateException("Empty table");
-                }
-            }
-        } );
-
-        save_button.setOnClickListener( v -> {
-            if (data_table.getChildCount() > 1) {
-                saveTable();
+                builder.setItems( tableList.toArray( new CharSequence[tableList.size()] ), (dialog, which) -> updateTable( tableList.elementAt( which ) ) );
             } else {
-                throw new IllegalStateException( "Empty table" );
+                String message = "These are no table in database";
+                builder.setMessage(message);
             }
-        } );
+
+            builder.setNeutralButton( "CREATE NEW", (dialog, which) -> dialog.dismiss() ); //Carry on with empty table
+            builder.setNegativeButton( "CANCEL", (dialog, which) -> {
+                dialog.cancel();
+                startActivity( new Intent( AddLeagueData.this, MainActivity.class ) );
+            } );
+
+            //Run builder
+            builder.show();
+
+            SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter( this, getSupportFragmentManager() );
+            ViewPager viewPager = findViewById( R.id.view_pager );
+            viewPager.setAdapter( sectionsPagerAdapter );
+            TabLayout tabs = findViewById( R.id.tabs );
+            tabs.setupWithViewPager( viewPager );
+            FloatingActionButton add_button = findViewById( R.id.fAAdd );
+            FloatingActionButton delete_button = findViewById( R.id.fADelete );
+            FloatingActionButton save_button = findViewById( R.id.fASave );
+
+            //Get tables and clear any existing data from them
+            this.data_table = findViewById( R.id.tableLayout );
+            for (int i = 1; i < this.data_table.getChildCount(); i++)
+                this.deleteRow( i );
+
+            this.schedule = findViewById( R.id.schedule );
+            for (int i = 1; i < this.schedule.getChildCount(); i++)
+                this.deleteMatch( i );
+            this.schedule.setVisibility( GONE );
+
+            tabs.getTabAt( 0 ).setText( "TEAMS" );
+            tabs.getTabAt( 1 ).setText( "SCHEDULE" );
+
+            tabs.addOnTabSelectedListener( new TabLayout.OnTabSelectedListener() {
+                @Override
+                public void onTabSelected(TabLayout.Tab tab) {
+                    switch (tab.getPosition()) {
+                        case 0:
+                            data_table.setVisibility( VISIBLE );
+                            break;
+                        case 1:
+                            schedule.setVisibility( VISIBLE );
+                            break;
+                    }
+                }
+
+                @Override
+                public void onTabUnselected(TabLayout.Tab tab) {
+                    switch (tab.getPosition()) {
+                        case 0:
+                            data_table.setVisibility( GONE );
+                            break;
+                        case 1:
+                            schedule.setVisibility( GONE );
+                            break;
+                    }
+                }
+
+                @Override
+                public void onTabReselected(TabLayout.Tab tab) {
+                }
+            } );
+
+            add_button.setOnClickListener( v -> {
+                if (this.data_table.getVisibility() == VISIBLE) {
+                    addRow();
+                } else {
+                    addMatch();
+                }
+            } );
+
+            delete_button.setOnClickListener( v -> {
+                if (this.data_table.getVisibility() == VISIBLE) {
+                    if (data_table.getChildCount() > 1) {
+                        for (int i = 1; i < data_table.getChildCount(); i++) {
+                            if (data_table.getChildAt( i ).isSelected()) {
+                                deleteRow( i );
+                            }
+                        }
+                    } else {
+                        throw new IllegalStateException( "Empty table" );
+                    }
+                } else {
+                    if (schedule.getChildCount() > 1) {
+                        for (int i = 1; i < schedule.getChildCount(); i++) {
+                            if (schedule.getChildAt( i ).isSelected()) {
+                                deleteMatch( i );
+                            }
+                        }
+                    } else {
+                        throw new IllegalStateException( "Empty table" );
+                    }
+                }
+            } );
+
+            save_button.setOnClickListener( v -> {
+                if (data_table.getChildCount() > 1) {
+                    saveTable();
+                } else {
+                    throw new IllegalStateException( "Empty table" );
+                }
+            } );
+        }
+        catch(Exception exe) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("ERROR: Exception!");
+            builder.setMessage(exe.getMessage());
+            builder.show();
+        }
     }
 
     protected void updateTable(String selected) {
-        SQLiteDatabase sqLiteDatabase = this.openOrCreateDatabase("LeagueData.db", MODE_PRIVATE, null);
+        SQLiteDatabase sqLiteDatabase = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O_MR1) {
+            sqLiteDatabase = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE);
+        }
 
         //First update data table
         Cursor leagueCursor = sqLiteDatabase.rawQuery("SELECT t.* FROM LEAGUE_" + selected + " t LIMIT 501;", null);
@@ -216,93 +234,103 @@ public class AddLeagueData extends AppCompatActivity {
     }
 
     protected void addRow() {
-        //Adds new row to data table
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Add team");
+        try {
+            //Adds new row to data table
+            AlertDialog.Builder builder = new AlertDialog.Builder( this );
+            builder.setTitle( "Add team" );
 
-        LayoutInflater inflater = getLayoutInflater();
+            LayoutInflater inflater = getLayoutInflater();
 
-        final View customLayout = inflater.inflate(R.layout.add_team, null);
+            @SuppressLint("InflateParams") final View customLayout = inflater.inflate( R.layout.add_team, null );
 
-        builder.setView(customLayout);
+            builder.setView( customLayout );
 
-        builder.setPositiveButton( "Ok", (dialog, which) -> {
-            //These items are initially visible
-            EditText txt_teamname = customLayout.findViewById(R.id.txt_teamname);
-            EditText txt_points5 = customLayout.findViewById(R.id.txt_points5);
-            CheckBox checkBox = customLayout.findViewById(R.id.checkbox);
+            builder.setPositiveButton( "Ok", (dialog, which) -> {
+                //These items are initially visible
+                EditText txt_teamname = customLayout.findViewById( R.id.txt_teamname );
+                EditText txt_points5 = customLayout.findViewById( R.id.txt_points5 );
+                CheckBox checkBox = customLayout.findViewById( R.id.checkbox );
 
-            //These items are initially invisible
-            EditText txt_matchesplayed = customLayout.findViewById(R.id.txt_matches_played);
-            EditText txt_wins = customLayout.findViewById(R.id.txt_wins);
-            EditText txt_draws = customLayout.findViewById(R.id.txt_draws);
-            EditText txt_loses = customLayout.findViewById(R.id.txt_loses);
-            EditText txt_totalpoints = customLayout.findViewById(R.id.txt_pointstotal);
-            EditText txt_gfor = customLayout.findViewById(R.id.txt_goalsfor);
-            EditText txt_gag = customLayout.findViewById(R.id.txt_goalsag);
+                //These items are initially invisible
+                EditText txt_matchesplayed = customLayout.findViewById( R.id.txt_matches_played );
+                EditText txt_wins = customLayout.findViewById( R.id.txt_wins );
+                EditText txt_draws = customLayout.findViewById( R.id.txt_draws );
+                EditText txt_loses = customLayout.findViewById( R.id.txt_loses );
+                EditText txt_totalpoints = customLayout.findViewById( R.id.txt_pointstotal );
+                EditText txt_gfor = customLayout.findViewById( R.id.txt_goalsfor );
+                EditText txt_gag = customLayout.findViewById( R.id.txt_goalsag );
 
-            TableRow newRow = new TableRow(getApplicationContext());
+                TableRow newRow = new TableRow( getApplicationContext() );
 
-            TextView team_name = new TextView(getApplicationContext());
-            team_name.setText(txt_teamname.getText().toString());
-            newRow.addView(team_name);
+                TextView team_name = new TextView( getApplicationContext() );
+                team_name.setText( txt_teamname.getText().toString() );
+                newRow.addView( team_name );
 
-            TextView matches_played = new TextView(getApplicationContext());
-            matches_played.setText(txt_matchesplayed.getText().toString());
-            newRow.addView(matches_played);
+                TextView matches_played = new TextView( getApplicationContext() );
+                matches_played.setText( txt_matchesplayed.getText().toString() );
+                newRow.addView( matches_played );
 
-            TextView wins = new TextView(getApplicationContext());
-            TextView draws = new TextView(getApplicationContext());
-            TextView loses = new TextView(getApplicationContext());
-            TextView total_points = new TextView(getApplicationContext());
-            TextView goals_for = new TextView(getApplicationContext());
-            TextView goals_against = new TextView(getApplicationContext());
-            TextView goal_diff = new TextView(getApplicationContext());
+                TextView wins = new TextView( getApplicationContext() );
+                TextView draws = new TextView( getApplicationContext() );
+                TextView loses = new TextView( getApplicationContext() );
+                TextView total_points = new TextView( getApplicationContext() );
+                TextView goals_for = new TextView( getApplicationContext() );
+                TextView goals_against = new TextView( getApplicationContext() );
+                TextView goal_diff = new TextView( getApplicationContext() );
 
-            if(checkBox.isChecked()) {
-                wins.setText(txt_wins.getText().toString());
-                draws.setText(txt_draws.getText().toString());
-                loses.setText(txt_loses.getText().toString());
-                total_points.setText(txt_totalpoints.getText().toString());
-                goals_for.setText(txt_gfor.getText().toString());
-                goals_against.setText( txt_gag.getText().toString());
-                goal_diff.setText(String.valueOf(
-                        Integer.parseInt(txt_gfor.getText().toString()) -
-                        Integer.parseInt(txt_gag.getText().toString())));
-            }
-            else {
-                wins.setText(String.valueOf(0));
-                draws.setText(String.valueOf(0));
-                loses.setText(String.valueOf(0));
-                total_points.setText(String.valueOf(0));
-                goals_for.setText(String.valueOf(0));
-                goals_against.setText(String.valueOf(0));
-                goal_diff.setText(String.valueOf(0));
-            }
+                if (checkBox.isChecked()) {
+                    wins.setText( txt_wins.getText().toString() );
+                    draws.setText( txt_draws.getText().toString() );
+                    loses.setText( txt_loses.getText().toString() );
+                    total_points.setText( txt_totalpoints.getText().toString() );
+                    goals_for.setText( txt_gfor.getText().toString() );
+                    goals_against.setText( txt_gag.getText().toString() );
+                    goal_diff.setText( String.valueOf(
+                            Integer.parseInt( txt_gfor.getText().toString() ) -
+                                    Integer.parseInt( txt_gag.getText().toString() ) ) );
+                } else {
+                    wins.setText( String.valueOf( 0 ) );
+                    draws.setText( String.valueOf( 0 ) );
+                    loses.setText( String.valueOf( 0 ) );
+                    total_points.setText( String.valueOf( 0 ) );
+                    goals_for.setText( String.valueOf( 0 ) );
+                    goals_against.setText( String.valueOf( 0 ) );
+                    goal_diff.setText( String.valueOf( 0 ) );
+                }
 
-            newRow.addView(wins);
-            newRow.addView(draws);
-            newRow.addView(loses);
-            newRow.addView(total_points);
-            newRow.addView(goals_for);
-            newRow.addView(goals_against);
-            newRow.addView(goal_diff);
+                newRow.addView( wins );
+                newRow.addView( draws );
+                newRow.addView( loses );
+                newRow.addView( total_points );
+                newRow.addView( goals_for );
+                newRow.addView( goals_against );
+                newRow.addView( goal_diff );
 
-            TextView points5 = new TextView(getApplicationContext());
-            points5.setText(txt_points5.getText().toString());
-            newRow.addView(points5);
+                TextView points5 = new TextView( getApplicationContext() );
+                points5.setText( txt_points5.getText().toString() );
+                newRow.addView( points5 );
 
-            newRow.setClickable(true);
+                newRow.setClickable( true );
 
-            newRow.setOnClickListener( v -> v.setSelected(true) );
+                newRow.setOnClickListener( v -> {
+                    v.setSelected( true );
+                    v.setBackgroundColor(argb(64, 128, 128, 255));
+                } );
 
-            data_table.addView(newRow);
-            dialog.dismiss();
-        } );
+                data_table.addView( newRow );
+                dialog.dismiss();
+            } );
 
-        builder.setNegativeButton( "Cancel", (dialog, which) -> dialog.cancel() );
+            builder.setNegativeButton( "Cancel", (dialog, which) -> dialog.cancel() );
 
-        builder.show();
+            builder.show();
+        }
+        catch(Exception exe) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("ERROR: Exception!");
+            builder.setMessage(exe.getMessage());
+            builder.show();
+        }
     }
 
     protected void addMatch() {
@@ -315,7 +343,7 @@ public class AddLeagueData extends AppCompatActivity {
 
         LayoutInflater inflater = getLayoutInflater();
 
-        final View customLayout = inflater.inflate(R.layout.add_match, null);
+        @SuppressLint("InflateParams") final View customLayout = inflater.inflate(R.layout.add_match, null);
 
         builder.setView(customLayout);
 
@@ -434,6 +462,12 @@ public class AddLeagueData extends AppCompatActivity {
             tableRow.addView(hscore);
             tableRow.addView(ascore);
 
+            tableRow.setClickable(true);
+            tableRow.setOnClickListener( v -> {
+                v.setSelected(true);
+                v.setBackgroundColor(argb(64, 128, 128, 255));
+            } );
+
             schedule.addView(tableRow);
 
             dialog.dismiss();
@@ -448,19 +482,26 @@ public class AddLeagueData extends AppCompatActivity {
     }
 
     protected void saveSchedule(String timestamp) {
-        if(timestamp != null) {
+        if(timestamp != null && this.schedule.getChildCount() > 0) {
             //Get database
-            SQLiteDatabase sqLiteDatabase = this.openOrCreateDatabase("LeagueData.db", MODE_PRIVATE, null);
+            SQLiteDatabase sqLiteDatabase = null;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O_MR1) {
+                sqLiteDatabase = SQLiteDatabase.openDatabase(dbPath, null, SQLiteDatabase.OPEN_READWRITE);
+            }
 
             //Check league table exists
             Cursor cursor = sqLiteDatabase.rawQuery("SELECT * FROM League_" + timestamp + ";", null);
             if(cursor.moveToFirst()) { //League table exists in database
 
                 //Check if schedule table exists
-                Cursor cursor2 = sqLiteDatabase.rawQuery("SELECT * FROM SCHEDULE_" + timestamp + ";", null);
-                if(!cursor2.moveToFirst()) { //Schedule not in database
-                    sqLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS SCHEDULE_" + timestamp +
-                            "(home TEXT, away TEXT, date NUMERIC, completed NUMERIC, hscore INTEGER, ascore INTEGER);");
+                Cursor cursor2;
+                try {
+                    cursor2 = sqLiteDatabase.rawQuery( "SELECT * FROM SCHEDULE_" + timestamp + ";", null );
+                }
+                catch(Exception exe) {
+                    //Schedule not in database
+                    sqLiteDatabase.execSQL( "CREATE TABLE IF NOT EXISTS SCHEDULE_" + timestamp +
+                            "(home TEXT, away TEXT, date NUMERIC, completed NUMERIC, hscore INTEGER, ascore INTEGER);" );
                 }
 
                 Cursor cursor3 = sqLiteDatabase.rawQuery("SELECT home, away FROM SCHEDULE_" + timestamp + ";", null);
@@ -475,16 +516,24 @@ public class AddLeagueData extends AppCompatActivity {
                     return bres;
                 };
 
+                Function2<View, Integer, Integer> fnscr = (v, i) -> {
+                    String str = String.valueOf (((TextView)((TableRow) v).getChildAt(i)).getText());
+                    if(str == "")
+                        return 0;
+                    else
+                        return 1;
+                };
+
                 for(int i = 1; i < this.schedule.getChildCount(); i++) {
                     String hstr = String.valueOf( ((TextView)((TableRow) this.schedule.getChildAt(i)).getChildAt(0)).getText() );
                     String astr = String.valueOf( ((TextView)((TableRow) this.schedule.getChildAt(i)).getChildAt(1)).getText() );
-                    long date = Long.parseLong( String.valueOf( ((TextView)((TableRow) this.schedule.getChildAt(i)).getChildAt(3)).getText() ) );
-                    int checked = Integer.parseInt( String.valueOf( ((TextView)((TableRow) this.schedule.getChildAt(i)).getChildAt(4)).getText() ) );
-                    int hscore = Integer.parseInt( String.valueOf( ((TextView)((TableRow) this.schedule.getChildAt(i)).getChildAt(5)).getText() ) );
-                    int ascore = Integer.parseInt( String.valueOf( ((TextView)((TableRow) this.schedule.getChildAt(i)).getChildAt(6)).getText() ) );
+                    long date = Long.parseLong( String.valueOf( ((TextView)((TableRow) this.schedule.getChildAt(i)).getChildAt(2)).getText() ) );
+                    int checked = fnscr.invoke(this.schedule.getChildAt(i), 3);
+                    int hscore = fnscr.invoke(this.schedule.getChildAt(i), 4);
+                    int ascore = fnscr.invoke(this.schedule.getChildAt(i), 5);
                     if(!fn.invoke(hstr, astr, cursor3)) {
-                        sqLiteDatabase.execSQL("INSERT INTO SCHEDULE_" + timestamp + "(home, away, date, completed, hscore, ascore) VALUES (" +
-                                hstr + ", " + astr + ", " + date + ", " + checked + ", " + hscore + ", " + ascore + ");");
+                        sqLiteDatabase.execSQL("INSERT INTO SCHEDULE_" + timestamp + "(home, away, date, completed, hscore, ascore) VALUES ('" +
+                                hstr + "', '" + astr + "', " + date + ", " + checked + ", " + hscore + ", " + ascore + ");");
                     }
                     else {
                         sqLiteDatabase.execSQL("UPDATE TABLE SCHEDULE_" + timestamp + "WHERE home=" +
@@ -558,46 +607,56 @@ public class AddLeagueData extends AppCompatActivity {
     protected void saveTable() {
         //Saves table to database
 
-        //Get current timestamp
-        Date time_now = new Date();
-        this.time_stamp = time_now.toString().replaceAll("\\s+", "").replaceAll(":", "").replaceAll(Pattern.quote("+"), "");
+        if(this.data_table.getChildCount() >= 3) {
+            //Get current timestamp
+            Date time_now = new Date();
+            this.time_stamp = time_now.toString().replaceAll( "\\s+", "" ).replaceAll( ":", "" ).replaceAll( Pattern.quote( "+" ), "" );
 
-        //Get database
-        SQLiteDatabase sqLiteDatabase = this.openOrCreateDatabase("LeagueData.db", MODE_PRIVATE, null);
+            //Get database
+            SQLiteDatabase sqLiteDatabase = null;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O_MR1) {
+                sqLiteDatabase = SQLiteDatabase.openDatabase( dbPath, null, SQLiteDatabase.OPEN_READWRITE );
+            }
 
-        //Create Table
-        sqLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS "
-                + "League_" + time_stamp
-                + " (teamName TEXT, matchesPlayed INTEGER, wins INTEGER, draws INTEGER, loses INTEGER, " +
-                "totalPoints INTEGER, goalsFor INTEGER, goalsAgainst INTEGER, goalsDiff INTEGER, " +
-                "pointsFive Integer, class TEXT);");
+            //Create Table
+            sqLiteDatabase.execSQL( "CREATE TABLE IF NOT EXISTS "
+                    + "League_" + time_stamp
+                    + " (teamName TEXT, matchesPlayed INTEGER, wins INTEGER, draws INTEGER, loses INTEGER, " +
+                    "totalPoints INTEGER, goalsFor INTEGER, goalsAgainst INTEGER, goalsDiff INTEGER, " +
+                    "pointsFive Integer, class TEXT);" );
 
-        //Populate table with data
-        for(int i = 1; i < this.data_table.getChildCount(); i++) {
-            TableRow tableRow = (TableRow) this.data_table.getChildAt(i);
+            //Populate table with data
+            for (int i = 1; i < this.data_table.getChildCount(); i++) {
+                TableRow tableRow = (TableRow) this.data_table.getChildAt( i );
 
-            int goalDiff = Integer.parseInt(String.valueOf(((TextView)tableRow.getChildAt(7)).getText()))
-                    - Integer.parseInt(String.valueOf(((TextView)tableRow.getChildAt(8)).getText()));
+                int goalDiff = Integer.parseInt( String.valueOf( ((TextView) tableRow.getChildAt( 7 )).getText() ) )
+                        - Integer.parseInt( String.valueOf( ((TextView) tableRow.getChildAt( 8 )).getText() ) );
 
-            sqLiteDatabase.execSQL("INSERT INTO " + "League_" + time_stamp + "(teamName, matchesPlayed" +
-                    "wins, draws, loses, totalPoints, goalsFor, goalsAgainst, goalsDiff, pointsFive, class) VALUES ("
-                    + ((TextView)tableRow.getChildAt(0)).getText() + ", "
-                    + ((TextView)tableRow.getChildAt(1)).getText() + ", "
-                    + ((TextView)tableRow.getChildAt(2)).getText() + ", "
-                    + ((TextView)tableRow.getChildAt(3)).getText() + ", "
-                    + ((TextView)tableRow.getChildAt(4)).getText() + ", "
-                    + ((TextView)tableRow.getChildAt(5)).getText() + ", "
-                    + ((TextView)tableRow.getChildAt(6)).getText() + ", "
-                    + ((TextView)tableRow.getChildAt(7)).getText() + ", "
-                    + ((TextView)tableRow.getChildAt(8)).getText() + ", "
-                    + goalDiff + ", "
-                    + ((TextView)tableRow.getChildAt(9)).getText() + ", "
-                    + "S);");
+                sqLiteDatabase.execSQL( "INSERT INTO " + "League_" + time_stamp + "(teamName, matchesPlayed, " +
+                        "wins, draws, loses, totalPoints, goalsFor, goalsAgainst, goalsDiff, pointsFive, class) VALUES ("
+                        + "'" + ((TextView) tableRow.getChildAt( 0 )).getText() + ", "
+                        + ((TextView) tableRow.getChildAt( 1 )).getText() + "', "
+                        + ((TextView) tableRow.getChildAt( 2 )).getText() + ", "
+                        + ((TextView) tableRow.getChildAt( 3 )).getText() + ", "
+                        + ((TextView) tableRow.getChildAt( 4 )).getText() + ", "
+                        + ((TextView) tableRow.getChildAt( 5 )).getText() + ", "
+                        + ((TextView) tableRow.getChildAt( 6 )).getText() + ", "
+                        + ((TextView) tableRow.getChildAt( 7 )).getText() + ", "
+                        + ((TextView) tableRow.getChildAt( 8 )).getText() + ", "
+                        + goalDiff + ", "
+                        + ((TextView) tableRow.getChildAt( 9 )).getText() + ", "
+                        + "'S');" );
+            }
+
+            sqLiteDatabase.close();
+            saveSchedule( this.time_stamp );
+
+            startActivity( new Intent( AddLeagueData.this, MainActivity.class ) );
         }
-
-        sqLiteDatabase.close();
-        saveSchedule(this.time_stamp);
-
-        startActivity( new Intent(AddLeagueData.this, MainActivity.class) );
+        else {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("Team table must have 3 or more teams!");
+            builder.show();
+        }
     }
 }

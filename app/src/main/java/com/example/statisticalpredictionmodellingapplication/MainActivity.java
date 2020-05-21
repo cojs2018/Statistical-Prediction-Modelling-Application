@@ -32,7 +32,6 @@ public class MainActivity extends AppCompatActivity {
         final Button read_me = findViewById(R.id.readme);
         read_me.setOnClickListener( v -> {
             //Display read_me.txt on screen
-            ReadMeActivity readme = new ReadMeActivity();
             startActivity(new Intent(MainActivity.this, ReadMeActivity.class));
         } );
     }
